@@ -8,11 +8,15 @@ public class CharacterControl : MonoBehaviour {
 	public bool WALKENABLED = true;
 	private int SPRINTBOOST = 2;
 
+	private Animator animator;
 	private Rigidbody2D rigidBody;
+	private SpriteRenderer spriteRenderer;
 	private bool sprinting = false;
 
 	void Start () {
 		rigidBody = GetComponent<Rigidbody2D>();
+		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+		animator = GetComponentInChildren<Animator>();
 	}
 	
 	void FixedUpdate () {
@@ -20,6 +24,32 @@ public class CharacterControl : MonoBehaviour {
 			Vector3 inputDirection = GetInputMoveDirection();
 			MoveCharacter(inputDirection);
 		}
+	}
+
+	private void AnimateState(Vector2 moveDirection) {
+		float up = Vector2.Dot(moveDirection, Vector2.up);
+		float right = Vector2.Dot(moveDirection, Vector2.right);
+
+		bool walking = true;
+
+		if (up > 0.5) {
+			spriteRenderer.flipX = false;
+			animator.SetInteger("direction", 0);
+		} else if (right > 0.5) {
+			spriteRenderer.flipX = false;
+			animator.SetInteger("direction", 1);
+		} else if (up < -0.5) {
+			spriteRenderer.flipX = false;
+			animator.SetInteger("direction", 2);
+		} else if (right < -0.5) {
+			spriteRenderer.flipX = true;
+			animator.SetInteger("direction", 3);
+		} else {
+			walking = false;
+		}
+
+		animator.SetBool("idle", !walking);
+		animator.SetBool("walking", walking);
 	}
 
 	// Get player input direction
@@ -41,6 +71,7 @@ public class CharacterControl : MonoBehaviour {
 
 		Vector3 moveVector = moveDirection * (WALKSPEED + sprintBoost) * Time.deltaTime;
 
+		AnimateState(new Vector2(moveDirection.x, moveDirection.y));
 		// Translate Character in this direction
 		transform.Translate(moveVector);
 	}

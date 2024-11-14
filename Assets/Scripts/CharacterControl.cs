@@ -6,15 +6,15 @@ public class CharacterControl : MonoBehaviour {
 
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
-	private int SPRINTBOOST = 2;
+	private int SPRINTBOOST = 1;
 
 	private Animator animator;
-	private Rigidbody2D rigidBody;
+	//private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
 	private bool sprinting = false;
 
 	void Start () {
-		rigidBody = GetComponent<Rigidbody2D>();
+		//rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
 	}
@@ -26,24 +26,25 @@ public class CharacterControl : MonoBehaviour {
 		}
 	}
 
+	// Changes animator parameters to switch between animation states
 	private void AnimateState(Vector2 moveDirection) {
 		float up = Vector2.Dot(moveDirection, Vector2.up);
 		float right = Vector2.Dot(moveDirection, Vector2.right);
 
 		bool walking = true;
 
-		if (up > 0.5) {
-			spriteRenderer.flipX = false;
-			animator.SetInteger("direction", 0);
-		} else if (right > 0.5) {
+		if (right > 0.5) {
 			spriteRenderer.flipX = false;
 			animator.SetInteger("direction", 1);
-		} else if (up < -0.5) {
-			spriteRenderer.flipX = false;
-			animator.SetInteger("direction", 2);
 		} else if (right < -0.5) {
 			spriteRenderer.flipX = true;
 			animator.SetInteger("direction", 3);
+		} else if (up < -0.5) {
+			spriteRenderer.flipX = false;
+			animator.SetInteger("direction", 2);
+		} else if (up > 0.5) {
+			spriteRenderer.flipX = false;
+			animator.SetInteger("direction", 0);
 		} else {
 			walking = false;
 		}

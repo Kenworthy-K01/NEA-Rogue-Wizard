@@ -15,7 +15,7 @@ public class CharacterControl : MonoBehaviour {
 		rigidBody = GetComponent<Rigidbody2D>();
 	}
 	
-	void Update () {
+	void FixedUpdate () {
 		if (WALKENABLED) {
 			Vector3 inputDirection = GetInputMoveDirection();
 			MoveCharacter(inputDirection);
@@ -25,8 +25,8 @@ public class CharacterControl : MonoBehaviour {
 	// Get player input direction
 	private Vector3 GetInputMoveDirection() {
 		// Input direction floats
-		float right = Input.GetAxis("Horizontal");
-		float up = Input.GetAxis("Vertical");
+		float right = Input.GetAxisRaw("Horizontal");
+		float up = Input.GetAxisRaw("Vertical");
 
 		// Normalized unit direction vector, multiply by speed float
 		Vector3 moveDirection = (new Vector3(right, up, 0)).normalized;
@@ -34,7 +34,7 @@ public class CharacterControl : MonoBehaviour {
 		return moveDirection;
 	}
 
-	// Move character by 1 frame moveDirection
+	// Move character by 1 frame in moveDirection
 	public void MoveCharacter(Vector3 moveDirection) {
 		sprinting = Input.GetKey(KeyCode.LeftShift);
 		int sprintBoost = sprinting ? SPRINTBOOST : 0;

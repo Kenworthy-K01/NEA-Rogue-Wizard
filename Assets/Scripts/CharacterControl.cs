@@ -9,6 +9,7 @@ public class CharacterControl : MonoBehaviour {
 	private int SPRINTBOOST = 1;
 
 	private Animator animator;
+	private Attributes attributes;
 	//private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
 	private bool sprinting = false;
@@ -17,9 +18,11 @@ public class CharacterControl : MonoBehaviour {
 		//rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
+		attributes = GetComponent<Attributes>();
 	}
 	
 	void FixedUpdate () {
+		WALKSPEED = attributes.CalculateWalkSpeed();
 		if (WALKENABLED) {
 			Vector3 inputDirection = GetInputMoveDirection();
 			MoveCharacter(inputDirection);

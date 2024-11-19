@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
+  - component: {fileID: 519420030}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -137,6 +138,20 @@ AudioListener:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
+--- !u!114 &519420030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1203af7afc1214147a78e45c57531d1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraSubject: {fileID: 1124966897}
+  followBuffer: 5
+  cameraType: 0
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -202,6 +217,7 @@ GameObject:
   - component: {fileID: 1124966898}
   - component: {fileID: 1124966901}
   - component: {fileID: 1124966902}
+  - component: {fileID: 1124966903}
   m_Layer: 0
   m_Name: Character
   m_TagString: Player
@@ -284,9 +300,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   strength: 0
   fortitude: 0
-  agility: 200
+  agility: 0
   intelligence: 0
   charisma: 0
+--- !u!114 &1124966903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1124966897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb68af07c3fc63e45b4bd49b8637876e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2078417334
 GameObject:
   m_ObjectHideFlags: 0

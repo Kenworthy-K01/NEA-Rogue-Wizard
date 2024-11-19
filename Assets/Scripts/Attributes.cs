@@ -60,6 +60,11 @@ public class Attributes : MonoBehaviour {
 		return Mathf.RoundToInt(2+(agility/25));
 	}
 
+	public int CalculateMaxHealth() {
+		int power = GetPower();
+		return Mathf.RoundToInt(100 + (fortitude/4) + (power/2));
+	}
+
 	private int ClampStat(int stat, int max) {
 		return Mathf.Clamp(stat, 0, max);
 	}

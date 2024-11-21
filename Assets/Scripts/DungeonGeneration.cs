@@ -6,10 +6,19 @@ public class DungeonGeneration : MonoBehaviour {
 
 	public int level = 1;
 
-
 	void Start () {
 
-		Debug.Log("Load level " + level);
+		GameObject startRoom = AddLevelRoom("Start", Vector3.zero);
+		GameObject nextRoom = AddLevelRoom("CorridorUpDown", new Vector3(0, -10, 0));
 
+	}
+
+	private GameObject AddLevelRoom(string roomId, Vector3 atPosition) {
+		string levelId = "Level0" + level;
+
+		GameObject roomOriginal = Resources.Load<GameObject>(levelId + "/" + roomId);
+		GameObject roomInstance = Instantiate(roomOriginal, atPosition, Quaternion.identity);
+
+		return roomInstance;
 	}
 }

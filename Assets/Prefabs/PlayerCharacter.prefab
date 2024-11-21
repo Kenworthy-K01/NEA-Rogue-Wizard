@@ -107,8 +107,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.041615844, y: 0.0042198896}
-  m_Size: {x: 0.8421835, y: 1.8494028}
+  m_Offset: {x: -0.041615844, y: -0.44070995}
+  m_Size: {x: 0.8421835, y: 0.9595431}
   m_Direction: 0
 --- !u!95 &95877454170835114
 Animator:
@@ -201,7 +201,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 269754537
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300004, guid: 4b07fad8445787d4db41708fde1cd66e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

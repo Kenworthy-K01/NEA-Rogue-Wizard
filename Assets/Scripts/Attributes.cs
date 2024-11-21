@@ -57,7 +57,7 @@ public class Attributes : MonoBehaviour {
 	}
 
 	public int CalculateWalkSpeed() {
-		return Mathf.RoundToInt(2+(agility/25));
+		return Mathf.RoundToInt(5+(agility/25));
 	}
 
 	public int CalculateMaxHealth() {

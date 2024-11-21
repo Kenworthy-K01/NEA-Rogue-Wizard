@@ -6,16 +6,16 @@ public class CharacterControl : MonoBehaviour {
 
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
-	private int SPRINTBOOST = 1;
+	private int SPRINTBOOST = 3;
 
 	private Animator animator;
 	private Attributes attributes;
-	//private Rigidbody2D rigidBody;
+	private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
 	private bool sprinting = false;
 
 	void Start () {
-		//rigidBody = GetComponent<Rigidbody2D>();
+		rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
 		attributes = GetComponent<Attributes>();
@@ -73,10 +73,10 @@ public class CharacterControl : MonoBehaviour {
 		sprinting = Input.GetKey(KeyCode.LeftShift);
 		int sprintBoost = sprinting ? SPRINTBOOST : 0;
 
-		Vector3 moveVector = moveDirection * (WALKSPEED + sprintBoost) * Time.deltaTime;
+		Vector3 moveVector = moveDirection * (WALKSPEED + sprintBoost);
 
 		AnimateState(new Vector2(moveDirection.x, moveDirection.y));
 		// Translate Character in this direction
-		transform.Translate(moveVector);
+		rigidBody.velocity = moveVector;
 	}
 }

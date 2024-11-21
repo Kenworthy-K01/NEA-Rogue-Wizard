@@ -280,6 +280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   level: 1
+  complexity: 3
 --- !u!4 &2098739182
 Transform:
   m_ObjectHideFlags: 0

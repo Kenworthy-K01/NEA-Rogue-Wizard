@@ -12,7 +12,7 @@ public class DungeonGeneration : MonoBehaviour {
 	// repeat until all points have >0 adjacents
 	// create every possible connection between points
 	
-	public int complexity = 10; // integer 1-20 describing how many scatter points
+	public int complexity = 10; // integer 1-19 describing how many scatter points
 	public int level = 1;
 
 	private readonly int[] alwaysAdjacent = { 8, 12, 13, 14, 18 };
@@ -29,7 +29,7 @@ public class DungeonGeneration : MonoBehaviour {
 	
 	private void Start () {
 		// Generate rooms
-		GameObject startRoom = AddLevelRoom("Start", Vector3.zero);
+		AddLevelRoom("Start", Vector3.zero);
 		List<int> scatterPoints = new List<int> { 8, 12, 13, 14, 18};
 		
 		// Scatter
@@ -67,12 +67,22 @@ public class DungeonGeneration : MonoBehaviour {
 		}
 
 		// Exhaust
-		foreach (int i in scatterPoints) {
-			if (i == 13) { continue; }
-			
-			string roomShape = GetRoomShape(scatterPoints, i);
-			Vector3 position = new Vector3(12 * (i%6), 12 * (i/6), 0);
-			AddLevelRoom(roomShape, position);
+		int row = 3;
+		int y = 2;
+		for (int i = 1; i <= 25; i++) {
+
+			if (scatterPoints.Contains(i)) {
+				int x = (i - (row)) % 3;
+
+				string roomShape = GetRoomShape(scatterPoints, i);
+				Vector3 position = new Vector3(12 * x, 12 * y, 0);
+				AddLevelRoom(roomShape, position);
+			}
+
+			if (i % 5 == 0) {
+				row += 5;
+				y -= 1;
+			}
 		}
 	}
 
@@ -83,7 +93,7 @@ public class DungeonGeneration : MonoBehaviour {
 		
 		for (int p = 0; p < adjCells.Length; p++) {
 			int cell = adjCells[p];
-			if (!scatterPoints.Contains(cell)) { continue; }
+			if (!scatterPoints.Contains(cell) || cell < 1 || cell > 25) { continue; }
 			exits += 1;
 			switch (p) {
 				case 0:
@@ -134,7 +144,7 @@ public class DungeonGeneration : MonoBehaviour {
 		int downPoint = cell + 5;
 		int leftPoint = cell - 1;
 		int rightPoint = cell + 1;
-		if ((cell + 1) % 5 == 0) {
+		if ((cell - 1) % 5 == 0) {
 			leftPoint = -1;
 		}
 		if (cell % 5 == 0) {

@@ -28,18 +28,30 @@ public class DungeonGeneration : MonoBehaviour {
 
 		AddLevelRoom("Start", Vector3.zero);
 
+		// Container of all rooms
 		List<Vector2> cells = new List<Vector2>();
 		cells.Add(Vector2.zero);
 
+		// Cells next to start room must be added
+		cells.Add(Vector2.right);
+		cells.Add(Vector2.left);
+		cells.Add(Vector2.up);
+		cells.Add(Vector2.down);
+
 		// Create paths
 		for (int i = 0; i < 5; i++) {
+			// Each path begins at 0, 0
 			Vector2 currentCell = new Vector2(0, 0);
 			Vector2 lastMove = new Vector2(0, 0);
+
+			// Each path is [complexity] rooms long
 			for (int j = 0; j < complexity; j++) {
 				Vector2 moveDirection = GetRandomMove(lastMove);
 				lastMove = moveDirection;
 				Vector2 newCell = currentCell + moveDirection;
 				currentCell = newCell;
+
+				// Don't add a cell that already exists
 				if (!cells.Contains(newCell)) {
 					cells.Add(newCell);
 				}
@@ -48,12 +60,73 @@ public class DungeonGeneration : MonoBehaviour {
 
 		// Exhaust
 		foreach (Vector2 cell in cells) {
-			string roomId = "Xupdownleftright";
+			if (cell == Vector2.zero) { continue; }
+			string roomId = GetRoomShape(cell, cells);
 			AddLevelRoom(roomId, cell*12);
 		}
 	}
 
+	private string GetRoomShape(Vector2 cell, List<Vector2> cellList) {
+		string roomShape = "U";
+		int exitNums = 0;
+		List<string> exitDirs = new List<string>();
+
+		// Get adjacent cell coordinates
+		Vector2 leftCell = cell + Vector2.left;
+		Vector2 rightCell = cell + Vector2.right;
+		Vector2 upCell = cell + Vector2.up;
+		Vector2 downCell = cell + Vector2.down;
+
+		// Check if these cells exist
+		if (cellList.Contains(upCell)) {
+			exitNums += 1;
+			exitDirs.Add("up");
+		}
+		if (cellList.Contains(downCell)) {
+			exitNums += 1;
+			exitDirs.Add("down");
+		}
+		if (cellList.Contains(leftCell)) {
+			exitNums += 1;
+			exitDirs.Add("left");
+		}
+		if (cellList.Contains(rightCell)) {
+			exitNums += 1;
+			exitDirs.Add("right");
+		}
+
+		// Find correct room shape
+		switch (exitNums) {
+		case 1:
+			roomShape = "U";
+			break;
+		case 2:
+			if ((exitDirs.Contains("up") && exitDirs.Contains("down")) || (exitDirs.Contains("left") && exitDirs.Contains("right"))) {
+				roomShape = "I";
+			} else {
+				roomShape = "L";
+			}
+			break;
+		case 3:
+			roomShape = "T";
+			break;
+		case 4:
+			roomShape = "X";
+			break;
+		}
+
+		// Add direction of adjacent rooms
+		string exitString = "";
+		foreach (string exit in exitDirs) {
+			exitString += exit;
+		}
+
+		return roomShape + exitString;
+	}
+
 	private Vector2 GetRandomMove(Vector2 lastMove) {
+		// Get a random direction that is not the opposite of lastMove (backtrack prevention)
+		// Also cannot move by 0, 0
 		Vector2 newMove = Vector2.zero;
 		do {
 			int dir = Random.Range(-1, 2);
@@ -63,14 +136,15 @@ public class DungeonGeneration : MonoBehaviour {
 			} else {
 				newMove = Vector2.up*dir;
 			}
-		} while (newMove == lastMove*-1 && newMove == Vector2.zero);
-		Debug.Log(newMove);
+		} while (newMove == lastMove*-1 || newMove == Vector2.zero);
+
 		return newMove;
 	}
 
 	private GameObject AddLevelRoom(string roomId, Vector3 atPosition) {
 		string levelId = "Level0" + level;
 
+		// Load room prefab from resources folder
 		GameObject roomOriginal = Resources.Load<GameObject>(levelId + "/" + roomId);
 		if (roomOriginal == null) {
 			Debug.Log("Missing room id: " + roomId);

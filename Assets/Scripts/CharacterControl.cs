@@ -8,17 +8,23 @@ public class CharacterControl : MonoBehaviour {
 	public bool WALKENABLED = true;
 	private int SPRINTBOOST = 3;
 
+	private BoxCollider2D hurtbox;
 	private Animator animator;
 	private Attributes attributes;
 	private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
+	private Loadout spellLoadout;
 	private bool sprinting = false;
 
+	private Attack activeAttack;
+
 	void Start () {
+		hurtbox = GetComponentInChildren<BoxCollider2D>();
 		rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
 		attributes = GetComponent<Attributes>();
+		spellLoadout = GetComponent<Loadout>();
 	}
 	
 	void FixedUpdate () {
@@ -27,6 +33,8 @@ public class CharacterControl : MonoBehaviour {
 			Vector3 inputDirection = GetInputMoveDirection();
 			MoveCharacter(inputDirection);
 		}
+
+		HandleCastInput();
 	}
 
 	// Changes animator parameters to switch between animation states
@@ -78,5 +86,46 @@ public class CharacterControl : MonoBehaviour {
 		AnimateState(new Vector2(moveDirection.x, moveDirection.y));
 		// Translate Character in this direction
 		rigidBody.velocity = moveVector;
+	}
+
+	// Spell Casting
+	private void HandleCastInput() {
+		if (Input.GetKeyDown(KeyCode.Mouse0)) {
+			CastAttack(1);
+		} else if (Input.GetKeyDown(KeyCode.Q)) {
+			CastAttack(2);
+		} else if (Input.GetKeyDown(KeyCode.E)) {
+			CastAttack(3);
+		} else if (Input.GetKeyDown(KeyCode.R)) {
+			CastAttack(4);
+		}
+	}
+
+	private void CastAttack(int slot) {
+		string spellId = spellLoadout.GetSpellIdFromSlot(slot);
+		if (spellId == "" || spellId == null) { return; }
+
+		hurtbox.enabled = true;
+
+		activeAttack = new Attack();
+		activeAttack.baseDamage = 15;
+		activeAttack.scaling = 1;
+		activeAttack.scaleType = ScaleType.Strength;
+		activeAttack.armorPenetration = 0;
+
+		Vector3 vfxPoint = transform.position;
+		GameObject spellFX = Resources.Load<GameObject>("VisualEffects/" + spellId);
+		GameObject spellFXInstance = Instantiate(spellFX, vfxPoint, Quaternion.identity);
+
+		hurtbox.enabled = false;
+	}
+
+	public void HurtboxHit(Collision2D hit) {
+		if (activeAttack == null) { return; }
+
+		GameObject target = hit.gameObject;
+		Health targetHp = target.GetComponent<Health>();
+		int damage = activeAttack.CalculateDamage(target);
+		targetHp.TakeDamage(damage);
 	}
 }

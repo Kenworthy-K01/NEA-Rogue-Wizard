@@ -10,6 +10,7 @@ public class Health : MonoBehaviour {
 	private Attributes attributes;
 
 	private void Start() {
+
 		attributes = GetComponent<Attributes>();
 
 		MaxHealth = attributes.CalculateMaxHealth();

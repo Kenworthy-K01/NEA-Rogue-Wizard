@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,7 +17,9 @@ public class CharacterControl : MonoBehaviour {
 	private Loadout spellLoadout;
 	private bool sprinting = false;
 
+	private float lastAttackCasted = 0f;
 	private Attack activeAttack;
+	private GameObject activeSpellVFX;
 
 	void Start () {
 		hurtbox = GetComponentInChildren<BoxCollider2D>();
@@ -34,6 +37,10 @@ public class CharacterControl : MonoBehaviour {
 			MoveCharacter(inputDirection);
 		}
 
+		float now = Time.time;
+		if (lastAttackCasted != 0 && now - lastAttackCasted > 1) {
+			CleanupActiveAttack();
+		}
 		HandleCastInput();
 	}
 
@@ -103,8 +110,11 @@ public class CharacterControl : MonoBehaviour {
 
 	private void CastAttack(int slot) {
 		string spellId = spellLoadout.GetSpellIdFromSlot(slot);
-		if (spellId == "" || spellId == null) { return; }
+		if (String.IsNullOrEmpty(spellId)) { return; } 
+		if (activeAttack != null) { return; }
 
+		lastAttackCasted = Time.time;
+		
 		hurtbox.enabled = true;
 
 		activeAttack = new Attack();
@@ -115,9 +125,17 @@ public class CharacterControl : MonoBehaviour {
 
 		Vector3 vfxPoint = transform.position;
 		GameObject spellFX = Resources.Load<GameObject>("VisualEffects/" + spellId);
-		GameObject spellFXInstance = Instantiate(spellFX, vfxPoint, Quaternion.identity);
+		activeSpellVFX = Instantiate(spellFX, vfxPoint, Quaternion.identity);
+		activeSpellVFX.transform.SetParent(gameObject.transform);
+	}
 
+	private void CleanupActiveAttack() {
+		Destroy(activeSpellVFX);
 		hurtbox.enabled = false;
+
+		lastAttackCasted = 0f;
+		activeSpellVFX = null;
+		activeAttack = null;
 	}
 
 	public void HurtboxHit(Collision2D hit) {

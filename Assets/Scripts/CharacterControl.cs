@@ -17,7 +17,7 @@ public class CharacterControl : MonoBehaviour {
 	private Loadout spellLoadout;
 	private bool sprinting = false;
 
-	private float lastAttackCasted = 0f;
+	private int attackStartFrame = 0;
 	private Attack activeAttack;
 	private GameObject activeSpellVFX;
 
@@ -37,8 +37,8 @@ public class CharacterControl : MonoBehaviour {
 			MoveCharacter(inputDirection);
 		}
 
-		float now = Time.time;
-		if (lastAttackCasted != 0 && now - lastAttackCasted > 1) {
+		float now = Time.frameCount;
+		if (attackStartFrame != 0 && now - attackStartFrame > 13) {
 			CleanupActiveAttack();
 		}
 		HandleCastInput();
@@ -113,7 +113,7 @@ public class CharacterControl : MonoBehaviour {
 		if (String.IsNullOrEmpty(spellId)) { return; } 
 		if (activeAttack != null) { return; }
 
-		lastAttackCasted = Time.time;
+		attackStartFrame = Time.frameCount;
 		
 		hurtbox.enabled = true;
 
@@ -133,7 +133,7 @@ public class CharacterControl : MonoBehaviour {
 		Destroy(activeSpellVFX);
 		hurtbox.enabled = false;
 
-		lastAttackCasted = 0f;
+		attackStartFrame = 0;
 		activeSpellVFX = null;
 		activeAttack = null;
 	}

@@ -17,8 +17,8 @@ TagManager:
   - 
   - Hurtbox
   - Hitbox
-  - 
-  - 
+  - Player
+  - Enemy
   - 
   - 
   - 
@@ -51,6 +51,9 @@ TagManager:
     locked: 0
   - name: player
     uniqueID: 269754537
+    locked: 0
+  - name: enemy
+    uniqueID: 3749556635
     locked: 0
   - name: foreground
     uniqueID: 2566213971

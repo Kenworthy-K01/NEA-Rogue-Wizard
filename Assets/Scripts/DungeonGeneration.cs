@@ -15,14 +15,19 @@ public class DungeonGeneration : MonoBehaviour {
 	public int complexity = 4; // integer describing length of paths
 	public int level = 1;
 
-	private bool Find<T>(T[] table, T item) {
-		foreach (T i in table) {
-			if (EqualityComparer<T>.Default.Equals(i, item)) {
-				return true;
-			}
-		}
-		return false;
-	}
+/*	string[] enemyByLevelNum = {
+		{
+			"Skeleton",
+		},
+		{
+			"Skeleton",
+			"Mage",
+		},
+		{
+			"Skeleton",
+			"Mage",
+		},
+	};*/
 	
 	private void Start () {
 		// Generate rooms
@@ -63,7 +68,10 @@ public class DungeonGeneration : MonoBehaviour {
 		foreach (Vector2 cell in cells) {
 			if (cell == Vector2.zero) { continue; }
 			string roomId = GetRoomShape(cell, cells);
-			AddLevelRoom(roomId, cell*12);
+			GameObject room = AddLevelRoom(roomId, cell*12);
+			if (Random.Range(1, 100) <= 20) {
+				PopulateRoom(room);
+			}
 		}
 	}
 
@@ -140,6 +148,10 @@ public class DungeonGeneration : MonoBehaviour {
 		} while (newMove == lastMove*-1 || newMove == Vector2.zero);
 
 		return newMove;
+	}
+
+	private void PopulateRoom(GameObject room) {
+		
 	}
 
 	private GameObject AddLevelRoom(string roomId, Vector3 atPosition) {

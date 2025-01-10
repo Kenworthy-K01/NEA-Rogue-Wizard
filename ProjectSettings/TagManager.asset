@@ -50,10 +50,7 @@ TagManager:
   - name: props
     uniqueID: 1161527805
     locked: 0
-  - name: player
-    uniqueID: 269754537
-    locked: 0
-  - name: enemy
+  - name: entity
     uniqueID: 3749556635
     locked: 0
   - name: foreground

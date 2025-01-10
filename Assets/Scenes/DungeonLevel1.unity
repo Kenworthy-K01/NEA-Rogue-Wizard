@@ -168,9 +168,9 @@ GameObject:
   - component: {fileID: 486969087}
   - component: {fileID: 486969083}
   - component: {fileID: 486969082}
-  m_Layer: 11
+  m_Layer: 10
   m_Name: Skeleton
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -277,7 +277,7 @@ GameObject:
   - component: {fileID: 836149780}
   - component: {fileID: 836149782}
   - component: {fileID: 836149781}
-  m_Layer: 11
+  m_Layer: 10
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -405,8 +405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c691d6a388273d54caf87027352ad8a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effector: {fileID: 486969081}
-  message: HurtboxHit
+  canHitTag: Player
 --- !u!61 &879976157
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -414,7 +413,7 @@ BoxCollider2D:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 879976154}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1

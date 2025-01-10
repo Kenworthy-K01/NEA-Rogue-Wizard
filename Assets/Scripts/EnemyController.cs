@@ -11,7 +11,7 @@ public class EnemyController : MonoBehaviour {
 	public bool WALKENABLED = true;
 	public int AGGRORANGE = 15;
 
-	private BoxCollider2D hurtbox;
+	private Hurtbox hurtbox;
 	private Animator animator;
 	private Attributes attributes;
 	private Rigidbody2D rigidBody;
@@ -25,7 +25,7 @@ public class EnemyController : MonoBehaviour {
 	private int attackStartFrame = 0;
 
 	void Start () {
-		hurtbox = GetComponentInChildren<BoxCollider2D>();
+		hurtbox = GetComponentInChildren<Hurtbox>();
 		rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
@@ -50,13 +50,12 @@ public class EnemyController : MonoBehaviour {
 				MoveCharacter();
 			}
 		} else if (currentState == BrainState.Attacking) {
-			// Create attack on first frame, destroy it on 7th
+			// Create attack on first frame, destroy it on 30th
 			moveDirection = Vector3.zero;
 			MoveCharacter();
 
 			if (activeAttack == null) {
 				attackStartFrame = Time.frameCount;
-				hurtbox.enabled = true;
 
 				activeAttack = new Attack();
 				activeAttack.baseDamage = 10;
@@ -65,17 +64,25 @@ public class EnemyController : MonoBehaviour {
 				activeAttack.armorPenetration = 10;
 			} else {
 				int activeFrames = Time.frameCount - attackStartFrame;
-				if (activeFrames >= 30) {
+				if (activeFrames >= 24) {
 					CleanupAttack();
+				} else {
+					List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
+					foreach (GameObject hit in targets) {
+						if (activeAttack.HasHitTargetWithinFrames(hit, 24)) { continue; }
+						activeAttack.HitTarget(hit);
+						Health targetHp = hit.GetComponent<Health>();
+						int damage = activeAttack.CalculateDamage(hit);
+						targetHp.TakeDamage(damage);
+					}
 				}
 			}
 		}
 	}
 
 	private void CleanupAttack() {
-		activeAttack = null;
-		hurtbox.enabled = false;
 		currentState = BrainState.Idle;
+		activeAttack = null;
 	}
 
 	// Update the current brain state based on number of conditions
@@ -153,16 +160,5 @@ public class EnemyController : MonoBehaviour {
 
 		// Translate Character in this direction
 		rigidBody.velocity = moveVector;
-	}
-
-	public void HurtboxHit(Collision2D hit) {
-		Debug.Log("hit");
-		if (activeAttack == null) { return; }
-
-		GameObject target = hit.gameObject;
-		Health targetHp = target.GetComponent<Health>();
-		int damage = activeAttack.CalculateDamage(target);
-		targetHp.TakeDamage(damage);
-		Debug.Log(targetHp.GetCurrentHealth());
 	}
 }

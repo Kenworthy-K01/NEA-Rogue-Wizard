@@ -9,7 +9,7 @@ public class CharacterControl : MonoBehaviour {
 	public bool WALKENABLED = true;
 	private int SPRINTBOOST = 3;
 
-	private BoxCollider2D hurtbox;
+	private Hurtbox hurtbox;
 	private Animator animator;
 	private Attributes attributes;
 	private Rigidbody2D rigidBody;
@@ -22,7 +22,7 @@ public class CharacterControl : MonoBehaviour {
 	private GameObject activeSpellVFX;
 
 	void Start () {
-		hurtbox = GetComponentInChildren<BoxCollider2D>();
+		hurtbox = GetComponentInChildren<Hurtbox>();
 		rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
@@ -38,8 +38,19 @@ public class CharacterControl : MonoBehaviour {
 		}
 
 		float now = Time.frameCount;
-		if (attackStartFrame != 0 && now - attackStartFrame > 13) {
-			CleanupActiveAttack();
+		if (activeAttack != null) {
+			if (now - attackStartFrame > 13) {
+				CleanupActiveAttack();
+			} else {
+				List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
+				foreach (GameObject hit in targets) {
+					if (activeAttack.HasHitTargetWithinFrames(hit, 13)) { continue; }
+					activeAttack.HitTarget(hit);
+					Health targetHp = hit.GetComponent<Health>();
+					int damage = activeAttack.CalculateDamage(hit);
+					targetHp.TakeDamage(damage);
+				}
+			}
 		}
 		HandleCastInput();
 	}
@@ -136,14 +147,5 @@ public class CharacterControl : MonoBehaviour {
 		attackStartFrame = 0;
 		activeSpellVFX = null;
 		activeAttack = null;
-	}
-
-	public void HurtboxHit(Collision2D hit) {
-		if (activeAttack == null) { return; }
-
-		GameObject target = hit.gameObject;
-		Health targetHp = target.GetComponent<Health>();
-		int damage = activeAttack.CalculateDamage(target);
-		targetHp.TakeDamage(damage);
 	}
 }

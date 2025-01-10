@@ -4,15 +4,26 @@ using UnityEngine;
 
 public class Hurtbox : MonoBehaviour {
 
-	public GameObject effector;
-	public string message;
+	public string canHitTag = "Player";
 
-	void OnCollisionEnter2D(Collision2D hit) {
-		Debug.Log("collision enter");
-		if (effector == null || message == null) { return; }
+	private List<GameObject> colliding = new List<GameObject>();
+
+	void OnTriggerEnter2D(Collider2D hit) {
 		if (hit.gameObject.CompareTag("Hurtbox")) { return; }
-		Debug.Log("msg sent");
-		effector.SendMessage(message, hit);
+		if (!hit.gameObject.CompareTag(canHitTag)) { return; }
+
+		colliding.Add(hit.gameObject);
+	}
+
+	void OnTriggerExit2D(Collider2D hit) {
+		if (hit.gameObject.CompareTag("Hurtbox")) { return; }
+		if (!hit.gameObject.CompareTag(canHitTag)) { return; }
+
+		colliding.Remove(hit.gameObject);
+	}
+
+	public List<GameObject> GetObjectsInBoxBounds() {
+		return colliding;
 	}
 
 }

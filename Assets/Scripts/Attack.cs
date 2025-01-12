@@ -36,6 +36,7 @@ public class Attack {
 	}
 
 	public void HitTarget(GameObject target) {
+		target.SendMessage("HitStun");
 		if (targetLastHit.ContainsKey(target)) {
 			targetLastHit[target] = Time.frameCount;
 		} else {

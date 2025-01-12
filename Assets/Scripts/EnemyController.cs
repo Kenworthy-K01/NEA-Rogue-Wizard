@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour {
 
-	private enum BrainState { Idle, Following, Attacking, Dead };
+	private enum BrainState { Idle, Following, Attacking, Stun, Dead };
 
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
@@ -23,6 +23,7 @@ public class EnemyController : MonoBehaviour {
 	private BrainState currentState = BrainState.Idle;
 	private GameObject aggroTarget;
 	private int attackStartFrame = 0;
+	private int stunStartFrame = 0;
 
 	void Start () {
 		hurtbox = GetComponentInChildren<Hurtbox>();
@@ -37,11 +38,16 @@ public class EnemyController : MonoBehaviour {
 		currentState = GetBrainState();
 		AnimateState(currentState);
 
+		int now = Time.frameCount;
+		
 		// State-specific behaviour
 		if (currentState == BrainState.Dead || currentState == BrainState.Idle) {
 			moveDirection = Vector3.zero;
 			MoveCharacter();
-			return;
+		} else if (currentState == BrainState.Stun) {
+			if (now - stunStartFrame > 10) {
+				currentState = BrainState.Idle;
+			}
 		} else if (currentState == BrainState.Following) {
 			// Move toward aggro target
 			WALKSPEED = attributes.CalculateWalkSpeed();
@@ -55,7 +61,7 @@ public class EnemyController : MonoBehaviour {
 			MoveCharacter();
 
 			if (activeAttack == null) {
-				attackStartFrame = Time.frameCount;
+				attackStartFrame = now;
 
 				activeAttack = new Attack();
 				activeAttack.baseDamage = 10;
@@ -63,7 +69,7 @@ public class EnemyController : MonoBehaviour {
 				activeAttack.scaleType = ScaleType.Strength;
 				activeAttack.armorPenetration = 10;
 			} else {
-				int activeFrames = Time.frameCount - attackStartFrame;
+				int activeFrames = now - attackStartFrame;
 				if (activeFrames >= 24) {
 					CleanupAttack();
 				} else {
@@ -87,6 +93,11 @@ public class EnemyController : MonoBehaviour {
 
 	// Update the current brain state based on number of conditions
 	private BrainState GetBrainState() {
+		// Do not change state when stunned
+		if (currentState == BrainState.Stun) {
+			return currentState;
+		}
+		
 		// If health is negative enemy is dead
 		if (health.GetCurrentHealth() <= 0) {
 			return BrainState.Dead;
@@ -133,11 +144,7 @@ public class EnemyController : MonoBehaviour {
 			animator.SetBool("idle", false);
 
 			float right = Vector2.Dot(moveDirection, Vector2.right);
-
-			spriteRenderer.flipX = false;
-			if (right < -0.5) {
-				spriteRenderer.flipX = true;
-			}
+			spriteRenderer.flipX = (right < -0.5);
 		} else if (state == BrainState.Attacking) {
 			animator.Play("Skeleton_Attack");
 		} else if (state == BrainState.Dead) {
@@ -152,6 +159,15 @@ public class EnemyController : MonoBehaviour {
 		if (aggroTarget != null) {
 			moveDirection = (aggroTarget.transform.position - transform.position).normalized;
 		}
+	}
+
+	private void HitStun() {
+		stunStartFrame = Time.frameCount;
+		currentState = BrainState.Stun;
+		animator.Play("Skeleton_Hit");
+
+		Vector3 knockback = new Vector3(0, 0, 0);
+		rigidBody.velocity = knockback;
 	}
 
 	// Move character by 1 frame in moveDirection

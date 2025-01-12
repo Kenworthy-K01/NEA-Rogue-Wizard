@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 public class CharacterControl : MonoBehaviour {
 
@@ -14,9 +15,10 @@ public class CharacterControl : MonoBehaviour {
 	private Attributes attributes;
 	private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
-	private Loadout spellLoadout;
+	private Loadout spellLoadout; 
 	private bool sprinting = false;
 
+	private int stunStartFrame = 0;
 	private int attackStartFrame = 0;
 	private Attack activeAttack;
 	private GameObject activeSpellVFX;
@@ -62,17 +64,15 @@ public class CharacterControl : MonoBehaviour {
 
 		bool walking = true;
 
+		spriteRenderer.flipX = false;
 		if (right > 0.5) {
-			spriteRenderer.flipX = false;
 			animator.SetInteger("direction", 1);
 		} else if (right < -0.5) {
-			spriteRenderer.flipX = true;
 			animator.SetInteger("direction", 3);
+			spriteRenderer.flipX = true;
 		} else if (up < -0.5) {
-			spriteRenderer.flipX = false;
 			animator.SetInteger("direction", 2);
 		} else if (up > 0.5) {
-			spriteRenderer.flipX = false;
 			animator.SetInteger("direction", 0);
 		} else {
 			walking = false;
@@ -147,5 +147,13 @@ public class CharacterControl : MonoBehaviour {
 		attackStartFrame = 0;
 		activeSpellVFX = null;
 		activeAttack = null;
+	}
+	
+	private void HitStun() {
+		stunStartFrame = Time.frameCount;
+		animator.Play("Skeleton_Hit");
+
+		Vector3 knockback = new Vector3(0, 0, 0);
+		rigidBody.velocity = knockback;
 	}
 }

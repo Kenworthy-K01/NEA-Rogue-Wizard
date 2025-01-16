@@ -152,6 +152,16 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 212938131454604380, guid: 7196110ab7c06c44dafe397e27c65291,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+    - target: {fileID: 114457988267315712, guid: 7196110ab7c06c44dafe397e27c65291,
+        type: 2}
+      propertyPath: FlashMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 035181415fedf7542bc97f45cf66b7bd, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7196110ab7c06c44dafe397e27c65291, type: 2}
   m_IsPrefabAsset: 0

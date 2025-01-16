@@ -10,6 +10,8 @@ public class CharacterControl : MonoBehaviour {
 
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
+	public Material FlashMaterial;
+	private Material DefaultMaterial;
 	private int SPRINTBOOST = 3;
 
 	private Hurtbox hurtbox;
@@ -35,12 +37,19 @@ public class CharacterControl : MonoBehaviour {
 		attributes = GetComponent<Attributes>();
 		health = GetComponent<Health>();
 		spellLoadout = GetComponent<Loadout>();
+		DefaultMaterial = spriteRenderer.material;
 	}
 	
 	void FixedUpdate () {
 		int now = Time.frameCount;
 		currentState = GetHumanState(now);
 
+		if (activeAttack != null && now - attackStartFrame > 13) {
+			currentState = HumanState.Idle;
+			CleanupActiveAttack();
+		}
+
+		spriteRenderer.material = DefaultMaterial;
 		Vector3 moveDirection = Vector3.zero;
 		if (currentState == HumanState.Stunned || currentState == HumanState.Dead) {
 			AnimateState(currentState, moveDirection);
@@ -61,9 +70,7 @@ public class CharacterControl : MonoBehaviour {
 				moveDirection = MoveCharacter(inputDirection);
 			}
 		} else if (currentState == HumanState.Attacking) {
-			if (now - attackStartFrame > 13) {
-				CleanupActiveAttack();
-			} else {
+			if (activeAttack != null) {
 				List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
 				foreach (GameObject hit in targets) {
 					if (activeAttack.HasHitTargetWithinFrames(hit, 13)) { continue; }
@@ -194,6 +201,7 @@ public class CharacterControl : MonoBehaviour {
 	
 	private void HitStun() {
 		stunStartFrame = Time.frameCount;
+		spriteRenderer.material = FlashMaterial;
 
 		Vector3 knockback = new Vector3(0, 0, 0);
 		rigidBody.velocity = knockback;

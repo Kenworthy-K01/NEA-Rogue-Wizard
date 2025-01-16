@@ -166,6 +166,7 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	private void HitStun() {
+		if (currentState == BrainState.Dead) { return; }
 		stunStartFrame = Time.frameCount;
 		currentState = BrainState.Stun;
 		animator.Play("Skeleton_Hit");

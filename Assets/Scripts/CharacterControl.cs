@@ -6,6 +6,8 @@ using UnityEngine.Analytics;
 
 public class CharacterControl : MonoBehaviour {
 
+	private enum HumanState { Idle, Walking, Attacking, Stunned, Dead };
+
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
 	private int SPRINTBOOST = 3;
@@ -13,6 +15,7 @@ public class CharacterControl : MonoBehaviour {
 	private Hurtbox hurtbox;
 	private Animator animator;
 	private Attributes attributes;
+	private Health health;
 	private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
 	private Loadout spellLoadout; 
@@ -20,6 +23,7 @@ public class CharacterControl : MonoBehaviour {
 
 	private int stunStartFrame = 0;
 	private int attackStartFrame = 0;
+	private HumanState currentState = HumanState.Idle;
 	private Attack activeAttack;
 	private GameObject activeSpellVFX;
 
@@ -29,18 +33,34 @@ public class CharacterControl : MonoBehaviour {
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 		animator = GetComponentInChildren<Animator>();
 		attributes = GetComponent<Attributes>();
+		health = GetComponent<Health>();
 		spellLoadout = GetComponent<Loadout>();
 	}
 	
 	void FixedUpdate () {
-		WALKSPEED = attributes.CalculateWalkSpeed();
-		if (WALKENABLED) {
-			Vector3 inputDirection = GetInputMoveDirection();
-			MoveCharacter(inputDirection);
-		}
+		int now = Time.frameCount;
+		currentState = GetHumanState(now);
 
-		float now = Time.frameCount;
-		if (activeAttack != null) {
+		Vector3 moveDirection = Vector3.zero;
+		if (currentState == HumanState.Stunned || currentState == HumanState.Dead) {
+			AnimateState(currentState, moveDirection);
+			return;
+		} else if (currentState == HumanState.Idle) {
+			Vector3 inputDirection = GetInputMoveDirection();
+			if (inputDirection.magnitude > 0 && WALKENABLED) {
+				currentState = HumanState.Walking;
+			} else {
+				MoveCharacter(Vector3.zero);
+			}
+		} else if (currentState == HumanState.Walking) {
+			Vector3 inputDirection = GetInputMoveDirection();
+			if (inputDirection.magnitude == 0 || !WALKENABLED) {
+				currentState = HumanState.Idle;
+			} else {
+				WALKSPEED = attributes.CalculateWalkSpeed();
+				moveDirection = MoveCharacter(inputDirection);
+			}
+		} else if (currentState == HumanState.Attacking) {
 			if (now - attackStartFrame > 13) {
 				CleanupActiveAttack();
 			} else {
@@ -54,32 +74,55 @@ public class CharacterControl : MonoBehaviour {
 				}
 			}
 		}
+
+		AnimateState(currentState, moveDirection);
 		HandleCastInput();
 	}
 
-	// Changes animator parameters to switch between animation states
-	private void AnimateState(Vector2 moveDirection) {
-		float up = Vector2.Dot(moveDirection, Vector2.up);
-		float right = Vector2.Dot(moveDirection, Vector2.right);
+	private HumanState GetHumanState(int now) {
+		HumanState state = HumanState.Idle;
 
-		bool walking = true;
-
-		spriteRenderer.flipX = false;
-		if (right > 0.5) {
-			animator.SetInteger("direction", 1);
-		} else if (right < -0.5) {
-			animator.SetInteger("direction", 3);
-			spriteRenderer.flipX = true;
-		} else if (up < -0.5) {
-			animator.SetInteger("direction", 2);
-		} else if (up > 0.5) {
-			animator.SetInteger("direction", 0);
-		} else {
-			walking = false;
+		if (health.GetCurrentHealth() <= 0) {
+			state = HumanState.Dead;
+		} else if (now - stunStartFrame < 5) {
+			state = HumanState.Stunned;
+		} else if (GetInputMoveDirection().magnitude > 0) {
+			state = HumanState.Walking;
+		} else if (activeAttack != null) {
+			state = HumanState.Attacking;
 		}
 
-		animator.SetBool("idle", !walking);
-		animator.SetBool("walking", walking);
+		return state;
+	}
+
+	// Changes animator parameters to switch between animation states
+	private void AnimateState(HumanState state, Vector3 moveDirection) {
+		if (state == HumanState.Idle) {
+			animator.SetBool("idle", true);
+			animator.SetBool("walking", false);
+		} else if (state == HumanState.Walking) {
+			float up = Vector2.Dot(moveDirection, Vector2.up);
+			float right = Vector2.Dot(moveDirection, Vector2.right);
+
+			spriteRenderer.flipX = false;
+			if (right > 0.5) {
+				animator.SetInteger("direction", 1);
+			} else if (right < -0.5) {
+				animator.SetInteger("direction", 3);
+				spriteRenderer.flipX = true;
+			} else if (up < -0.5) {
+				animator.SetInteger("direction", 2);
+			} else if (up > 0.5) {
+				animator.SetInteger("direction", 0);
+			}
+
+			animator.SetBool("idle", false);
+			animator.SetBool("walking", true);
+		} else if (state == HumanState.Stunned) {
+			//	animator.Play("Stun");
+		} else if (state == HumanState.Dead) {
+			animator.Play("Player_Death");
+		}
 	}
 
 	// Get player input direction
@@ -89,21 +132,21 @@ public class CharacterControl : MonoBehaviour {
 		float up = Input.GetAxisRaw("Vertical");
 
 		// Normalized unit direction vector, multiply by speed float
-		Vector3 moveDirection = (new Vector3(right, up, 0)).normalized;
+		Vector3 inputDirection = (new Vector3(right, up, 0)).normalized;
 
-		return moveDirection;
+		return inputDirection;
 	}
 
 	// Move character by 1 frame in moveDirection
-	public void MoveCharacter(Vector3 moveDirection) {
+	public Vector3 MoveCharacter(Vector3 moveDirection) {
 		sprinting = Input.GetKey(KeyCode.LeftShift);
 		int sprintBoost = sprinting ? SPRINTBOOST : 0;
 
 		Vector3 moveVector = moveDirection * (WALKSPEED + sprintBoost);
 
-		AnimateState(new Vector2(moveDirection.x, moveDirection.y));
 		// Translate Character in this direction
 		rigidBody.velocity = moveVector;
+		return moveVector;
 	}
 
 	// Spell Casting
@@ -151,7 +194,6 @@ public class CharacterControl : MonoBehaviour {
 	
 	private void HitStun() {
 		stunStartFrame = Time.frameCount;
-		animator.Play("Skeleton_Hit");
 
 		Vector3 knockback = new Vector3(0, 0, 0);
 		rigidBody.velocity = knockback;

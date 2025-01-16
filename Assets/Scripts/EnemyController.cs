@@ -106,17 +106,21 @@ public class EnemyController : MonoBehaviour {
 		// If we already found a target and can still see them, follow/attack them
 		if (aggroTarget != null) {
 			double dist = GetTargetDistance(aggroTarget);
-			if (dist < 0.5 || currentState == BrainState.Attacking) {
+			Health targHp = aggroTarget.GetComponent<Health>();
+			if (((dist < 0.5) && (targHp.GetCurrentHealth() > 0)) || currentState == BrainState.Attacking) {
 				return BrainState.Attacking;
-			} else if (dist < AGGRORANGE) {
+			} else if ((dist < AGGRORANGE) && (targHp.GetCurrentHealth() > 0)) {
 				return BrainState.Following;
 			} else {
 				aggroTarget = null;
 			}
 		} else {
 			GameObject character = GameObject.FindGameObjectWithTag("Player");
-			if (character != null && GetTargetDistance(character) < AGGRORANGE) {
-				aggroTarget = character;
+			if (character != null) {
+				Health playerHp = character.GetComponent<Health>();
+				if ((playerHp.GetCurrentHealth() > 0) && (GetTargetDistance(character) < AGGRORANGE)) {
+					aggroTarget = character;
+				}
 			}
 		}
 

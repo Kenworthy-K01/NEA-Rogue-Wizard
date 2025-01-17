@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Analytics;
+using UnityEngine.UI;
 
 public class CharacterControl : MonoBehaviour {
 
@@ -13,6 +14,8 @@ public class CharacterControl : MonoBehaviour {
 	public Material FlashMaterial;
 	private Material DefaultMaterial;
 	private int SPRINTBOOST = 3;
+
+	private GameObject HeadsUpDisplay;
 
 	private Hurtbox hurtbox;
 	private Animator animator;
@@ -30,6 +33,7 @@ public class CharacterControl : MonoBehaviour {
 	private GameObject activeSpellVFX;
 
 	void Start () {
+		HeadsUpDisplay = GameObject.FindGameObjectWithTag("HUD");
 		hurtbox = GetComponentInChildren<Hurtbox>();
 		rigidBody = GetComponent<Rigidbody2D>();
 		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -44,14 +48,24 @@ public class CharacterControl : MonoBehaviour {
 		int now = Time.frameCount;
 		currentState = GetHumanState(now);
 
+		GameObject healthbar = HeadsUpDisplay.transform.Find("Fill").gameObject;
+		Image fillImage = healthbar.GetComponent<Image>();
+		fillImage.fillAmount = ((float)health.GetCurrentHealth() / (float)health.GetMaxHealth(false));
+
 		if (activeAttack != null && now - attackStartFrame > 13) {
 			currentState = HumanState.Idle;
 			CleanupActiveAttack();
 		}
 
-		spriteRenderer.material = DefaultMaterial;
 		Vector3 moveDirection = Vector3.zero;
-		if (currentState == HumanState.Stunned || currentState == HumanState.Dead) {
+		if (currentState == HumanState.Stunned) {
+			spriteRenderer.material = FlashMaterial;
+			MoveCharacter(Vector3.zero);
+			AnimateState(currentState, moveDirection);
+			return;
+		} else if (currentState == HumanState.Dead) {
+			spriteRenderer.material = DefaultMaterial;
+			MoveCharacter(Vector3.zero);
 			AnimateState(currentState, moveDirection);
 			return;
 		} else if (currentState == HumanState.Idle) {
@@ -82,6 +96,7 @@ public class CharacterControl : MonoBehaviour {
 			}
 		}
 
+		spriteRenderer.material = DefaultMaterial;
 		AnimateState(currentState, moveDirection);
 		HandleCastInput();
 	}
@@ -129,6 +144,7 @@ public class CharacterControl : MonoBehaviour {
 			//	animator.Play("Stun");
 		} else if (state == HumanState.Dead) {
 			animator.Play("Player_Death");
+			spriteRenderer.sortingOrder = -2;
 		}
 	}
 

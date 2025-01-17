@@ -5,12 +5,14 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour {
 
-	private enum BrainState { Idle, Following, Attacking, Stun, Dead };
+	private enum BrainState { Idle, Following, Attacking, Stunned, Dead };
 
+	// Enemy Configs
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
 	public int AGGRORANGE = 15;
 
+	// Other enemy behaviours
 	private Hurtbox hurtbox;
 	private Animator animator;
 	private Attributes attributes;
@@ -18,12 +20,14 @@ public class EnemyController : MonoBehaviour {
 	private SpriteRenderer spriteRenderer;
 	private Health health;
 
+	// Changing states and attributes
 	private Attack activeAttack;
 	private Vector3 moveDirection = Vector3.zero;
 	private BrainState currentState = BrainState.Idle;
 	private GameObject aggroTarget;
 	private int attackStartFrame = 0;
 	private int stunStartFrame = 0;
+	private int diedAtFrame = 0;
 
 	void Start () {
 		hurtbox = GetComponentInChildren<Hurtbox>();
@@ -35,6 +39,7 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
+		// Update the current state
 		currentState = GetBrainState();
 		AnimateState(currentState);
 
@@ -42,21 +47,27 @@ public class EnemyController : MonoBehaviour {
 		
 		// State-specific behaviour
 		if (currentState == BrainState.Dead || currentState == BrainState.Idle) {
+			if (currentState == BrainState.Dead && now - diedAtFrame > 240) {
+				// We've been dead for 60 frames, cleanup the model
+				Destroy(gameObject);
+				return;
+			}
 			moveDirection = Vector3.zero;
 			MoveCharacter();
-		} else if (currentState == BrainState.Stun) {
+		} else if (currentState == BrainState.Stunned) {
 			if (now - stunStartFrame > 10) {
+				// Return to Idle after being Stunned
 				currentState = BrainState.Idle;
 			}
 		} else if (currentState == BrainState.Following) {
-			// Move toward aggro target
+			// Move toward aggro target & update walk speed
 			WALKSPEED = attributes.CalculateWalkSpeed();
 			if (WALKENABLED) {
 				UpdateMoveDirection();
 				MoveCharacter();
 			}
 		} else if (currentState == BrainState.Attacking) {
-			// Create attack on first frame, destroy it on 30th
+			// Create hitbox on 10th frame, destroy it on 24th
 			moveDirection = Vector3.zero;
 			MoveCharacter();
 
@@ -72,11 +83,15 @@ public class EnemyController : MonoBehaviour {
 				int activeFrames = now - attackStartFrame;
 				if (activeFrames >= 24) {
 					CleanupAttack();
-				} else {
+				} else if (activeFrames >= 20) {
+					// Every frame, check if a new object has entered the hitbox
 					List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
 					foreach (GameObject hit in targets) {
+						// Have we already hit this target
 						if (activeAttack.HasHitTargetWithinFrames(hit, 24)) { continue; }
 						activeAttack.HitTarget(hit);
+
+						// Deal damage
 						Health targetHp = hit.GetComponent<Health>();
 						int damage = activeAttack.CalculateDamage(hit);
 						targetHp.TakeDamage(damage);
@@ -94,12 +109,15 @@ public class EnemyController : MonoBehaviour {
 	// Update the current brain state based on number of conditions
 	private BrainState GetBrainState() {
 		// Do not change state when stunned
-		if (currentState == BrainState.Stun) {
+		if (currentState == BrainState.Stunned) {
 			return currentState;
 		}
 		
 		// If health is negative enemy is dead
-		if (health.GetCurrentHealth() <= 0) {
+		if (health.GetCurrentHealth() <= 0 ) {
+			if (currentState != BrainState.Dead) {
+				diedAtFrame = Time.frameCount;
+			}
 			return BrainState.Dead;
 		}
 
@@ -107,14 +125,16 @@ public class EnemyController : MonoBehaviour {
 		if (aggroTarget != null) {
 			double dist = GetTargetDistance(aggroTarget);
 			Health targHp = aggroTarget.GetComponent<Health>();
-			if (((dist < 0.5) && (targHp.GetCurrentHealth() > 0)) || currentState == BrainState.Attacking) {
+			int now = Time.frameCount;
+			if (((dist < 1) && (targHp.GetCurrentHealth() > 0) && (now - attackStartFrame > 60)) || currentState == BrainState.Attacking) {
 				return BrainState.Attacking;
-			} else if ((dist < AGGRORANGE) && (targHp.GetCurrentHealth() > 0)) {
+			} else if ((dist > 1) && (dist < AGGRORANGE) && (targHp.GetCurrentHealth() > 0)) {
 				return BrainState.Following;
 			} else {
 				aggroTarget = null;
 			}
 		} else {
+			// Find the player object and check if they are visible
 			GameObject character = GameObject.FindGameObjectWithTag("Player");
 			if (character != null) {
 				Health playerHp = character.GetComponent<Health>();
@@ -150,32 +170,40 @@ public class EnemyController : MonoBehaviour {
 			float right = Vector2.Dot(moveDirection, Vector2.right);
 			spriteRenderer.flipX = (right < -0.5);
 		} else if (state == BrainState.Attacking) {
-			animator.Play("Skeleton_Attack");
+			if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Skeleton_Attack")) {
+				animator.Play("Skeleton_Attack");
+			}
 		} else if (state == BrainState.Dead) {
-			animator.Play("Skeleton_Death");
+			if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Skeleton_Death")) {
+				animator.Play("Skeleton_Death");
+			}
 		}
 	}
 
-	// Get follow direction
+	// Get direction toward target
 	private void UpdateMoveDirection() {
 		// Normalized unit direction vector, multiply by speed float
 		moveDirection = Vector3.zero;
 		if (aggroTarget != null) {
-			moveDirection = (aggroTarget.transform.position - transform.position).normalized;
+			Vector3 dir = (aggroTarget.transform.position - transform.position).normalized;
+			moveDirection = dir;
 		}
 	}
 
+	// Inflict "Stunned" when hit
 	private void HitStun() {
 		if (currentState == BrainState.Dead) { return; }
+		// Inflict stun when hit
 		stunStartFrame = Time.frameCount;
-		currentState = BrainState.Stun;
+		currentState = BrainState.Stunned;
 		animator.Play("Skeleton_Hit");
 
+		// Knocked back away from the attack
 		Vector3 knockback = new Vector3(0, 0, 0);
 		rigidBody.velocity = knockback;
 	}
 
-	// Move character by 1 frame in moveDirection
+	// Update rigidBody velocity in moveDirection
 	public void MoveCharacter() {
 		Vector3 moveVector = moveDirection * WALKSPEED;
 

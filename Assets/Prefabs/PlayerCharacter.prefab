@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 114047087106284296}
   - component: {fileID: 114605942049940704}
   - component: {fileID: 114886123930428036}
+  - component: {fileID: 114583230886916890}
   m_Layer: 10
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -256,6 +257,7 @@ MonoBehaviour:
   agility: 0
   intelligence: 0
   charisma: 0
+  skillPoints: 0
 --- !u!114 &114457988267315712
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -269,6 +271,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WALKSPEED: 4
   WALKENABLED: 1
+  FlashMaterial: {fileID: 2100000, guid: 035181415fedf7542bc97f45cf66b7bd, type: 2}
+--- !u!114 &114583230886916890
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1547538976548704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b7c2feba63d5834ba1c56d1fde16bf7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114605942049940704
 MonoBehaviour:
   m_ObjectHideFlags: 1

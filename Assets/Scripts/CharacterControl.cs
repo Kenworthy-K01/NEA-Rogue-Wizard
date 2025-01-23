@@ -48,7 +48,7 @@ public class CharacterControl : MonoBehaviour {
 		int now = Time.frameCount;
 		currentState = GetHumanState(now);
 
-		GameObject healthbar = HeadsUpDisplay.transform.Find("Fill").gameObject;
+		GameObject healthbar = HeadsUpDisplay.transform.Find("HealthBarFill").gameObject;
 		Image fillImage = healthbar.GetComponent<Image>();
 		fillImage.fillAmount = ((float)health.GetCurrentHealth() / (float)health.GetMaxHealth(false));
 
@@ -214,7 +214,7 @@ public class CharacterControl : MonoBehaviour {
 		activeSpellVFX = null;
 		activeAttack = null;
 	}
-	
+
 	private void HitStun() {
 		stunStartFrame = Time.frameCount;
 		spriteRenderer.material = FlashMaterial;

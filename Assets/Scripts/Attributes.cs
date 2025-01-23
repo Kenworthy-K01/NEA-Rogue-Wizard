@@ -8,6 +8,7 @@ public class Attributes : MonoBehaviour {
 	public int agility = 0;
 	public int intelligence = 0;
 	public int charisma = 0;
+	public int skillPoints = 0;
 
 	public int GetPower() {
 		int power = 0;
@@ -21,7 +22,18 @@ public class Attributes : MonoBehaviour {
 		return power;
 	}
 
+	public void AwardSkillPoints(int num) {
+		skillPoints += num;
+	}
+
+	private void SpendSkillPoints(int num) {
+		skillPoints -= num;
+	}
+
 	public void SetStrength(int newStrength) {
+		int delta = newStrength-strength;
+		if (delta > 0) { SpendSkillPoints(delta); }
+
 		int power = GetPower() - strength;
 
 		int remainingPower = 200 - power;
@@ -29,6 +41,9 @@ public class Attributes : MonoBehaviour {
 	}
 
 	public void SetFortitude(int newFortitude) {
+		int delta = newFortitude-fortitude;
+		if (delta > 0) { SpendSkillPoints(delta); }
+
 		int power = GetPower() - fortitude;
 
 		int remainingPower = 200 - power;
@@ -36,6 +51,9 @@ public class Attributes : MonoBehaviour {
 	}
 
 	public void SetAgility(int newAgility) {
+		int delta = newAgility-agility;
+		if (delta > 0) { SpendSkillPoints(delta); }
+
 		int power = GetPower() - agility;
 
 		int remainingPower = 200 - power;
@@ -43,6 +61,9 @@ public class Attributes : MonoBehaviour {
 	}
 
 	public void SetIntelligence(int newIntelligence) {
+		int delta = newIntelligence-intelligence;
+		if (delta > 0) { SpendSkillPoints(delta); }
+
 		int power = GetPower() - intelligence;
 
 		int remainingPower = 200 - power;
@@ -50,6 +71,9 @@ public class Attributes : MonoBehaviour {
 	}
 
 	public void SetCharisma(int newCharisma) {
+		int delta = newCharisma-charisma;
+		if (delta > 0) { SpendSkillPoints(delta); }
+
 		int power = GetPower() - charisma;
 
 		int remainingPower = 200 - power;

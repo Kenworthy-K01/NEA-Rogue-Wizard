@@ -49,7 +49,7 @@ public class EnemyController : MonoBehaviour {
 		if (currentState == BrainState.Dead || currentState == BrainState.Idle) {
 			if (currentState == BrainState.Dead && now - diedAtFrame > 240) {
 				// We've been dead for 60 frames, cleanup the model
-				Destroy(gameObject);
+				OnDeath();
 				return;
 			}
 			moveDirection = Vector3.zero;
@@ -99,6 +99,15 @@ public class EnemyController : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	private void OnDeath() {
+		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		// Reward player
+		Attributes attr = player.GetComponent<Attributes>();
+		attr.AwardSkillPoints(3);
+
+		Destroy(gameObject);
 	}
 
 	private void CleanupAttack() {

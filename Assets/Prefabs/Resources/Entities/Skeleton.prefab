@@ -250,9 +250,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf13eadcfddb5fb4896f785b81630726, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WALKSPEED: 3
+  WALKSPEED: 4
   WALKENABLED: 1
-  AGGRORANGE: 7
+  AGGRORANGE: 14
 --- !u!114 &114242197484765796
 MonoBehaviour:
   m_ObjectHideFlags: 1

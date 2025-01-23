@@ -14,20 +14,7 @@ public class DungeonGeneration : MonoBehaviour {
 	
 	public int complexity = 4; // integer describing length of paths
 	public int level = 1;
-
-/*	string[] enemyByLevelNum = {
-		{
-			"Skeleton",
-		},
-		{
-			"Skeleton",
-			"Mage",
-		},
-		{
-			"Skeleton",
-			"Mage",
-		},
-	};*/
+	public string[] enemies;
 	
 	private void Start () {
 		// Generate rooms
@@ -69,8 +56,8 @@ public class DungeonGeneration : MonoBehaviour {
 			if (cell == Vector2.zero) { continue; }
 			string roomId = GetRoomShape(cell, cells);
 			GameObject room = AddLevelRoom(roomId, cell*12);
-			if (Random.Range(1, 100) <= 20) {
-				PopulateRoom(room);
+			if (Random.Range(1, 100) <= 40) {
+				PopulateRoom(room, Random.Range(1, 5));
 			}
 		}
 	}
@@ -150,8 +137,13 @@ public class DungeonGeneration : MonoBehaviour {
 		return newMove;
 	}
 
-	private void PopulateRoom(GameObject room) {
-		
+	private void PopulateRoom(GameObject room, int num) {
+		for (int i = 1; i <= num; i++) {
+			string enemyId = enemies[Random.Range(0, enemies.Length)];
+			GameObject entityOriginal = Resources.Load<GameObject>("Entities/" + enemyId);
+			Vector3 atPosition = room.transform.Find("SpawnPoint" + Random.Range(1, 3)).position;
+			Instantiate(entityOriginal, atPosition, Quaternion.identity);
+		}
 	}
 
 	private GameObject AddLevelRoom(string roomId, Vector3 atPosition) {

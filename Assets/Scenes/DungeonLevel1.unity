@@ -622,6 +622,12 @@ Prefab:
       propertyPath: skillPoints
       value: 20
       objectReference: {fileID: 0}
+    - target: {fileID: 212938131454604380, guid: 7196110ab7c06c44dafe397e27c65291,
+        type: 2}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300154, guid: ef671bbabca51774dbad0011e4e66128,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7196110ab7c06c44dafe397e27c65291, type: 2}
   m_IsPrefabAsset: 0

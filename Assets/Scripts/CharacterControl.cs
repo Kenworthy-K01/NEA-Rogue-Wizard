@@ -26,6 +26,7 @@ public class CharacterControl : MonoBehaviour {
 	private Loadout spellLoadout; 
 	private bool sprinting = false;
 
+	private Vector2 mouseDirection;
 	private int stunStartFrame = 0;
 	private int attackStartFrame = 0;
 	private HumanState currentState = HumanState.Idle;
@@ -52,6 +53,9 @@ public class CharacterControl : MonoBehaviour {
 		Image fillImage = healthbar.GetComponent<Image>();
 		fillImage.fillAmount = ((float)health.GetCurrentHealth() / (float)health.GetMaxHealth(false));
 
+		Vector3 mouseDirectionV3 =(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position);
+		mouseDirection = new Vector2(mouseDirectionV3.x, mouseDirectionV3.y);
+			
 		if (activeAttack != null && now - attackStartFrame > 13) {
 			currentState = HumanState.Idle;
 			CleanupActiveAttack();
@@ -140,6 +144,19 @@ public class CharacterControl : MonoBehaviour {
 
 			animator.SetBool("idle", false);
 			animator.SetBool("walking", true);
+		} else if (state == HumanState.Attacking) {
+			Debug.Log(mouseDirection);
+			float up = Vector2.Dot(mouseDirection, Vector2.up);
+			float right = Vector2.Dot(mouseDirection, Vector2.right);
+
+			if (up > 0.5) {
+				animator.Play("Player_AttackUp");
+			} else if (up < -0.5) {
+				animator.Play("Player_AttackDown");
+			} else {
+				spriteRenderer.flipX = (right < -0.5);
+				animator.Play("Player_AttackRight");
+			}
 		} else if (state == HumanState.Stunned) {
 			//	animator.Play("Stun");
 		} else if (state == HumanState.Dead) {

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CharacterControl : MonoBehaviour {
 
-	private enum HumanState { Idle, Walking, Attacking, Stunned, Dead };
+	private enum HumanState { Idle, Walking, Attacking, Stunned, Frozen, Dead };
 
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
@@ -29,6 +30,7 @@ public class CharacterControl : MonoBehaviour {
 	private Vector2 mouseDirection;
 	private int stunStartFrame = 0;
 	private int attackStartFrame = 0;
+	private int diedFrame = 0;
 	private HumanState currentState = HumanState.Idle;
 	private Attack activeAttack;
 	private GameObject activeSpellVFX;
@@ -62,12 +64,24 @@ public class CharacterControl : MonoBehaviour {
 		}
 
 		Vector3 moveDirection = Vector3.zero;
+
+		// Frozen state for manual control only
+		if (currentState == HumanState.Frozen) { return; }
+
 		if (currentState == HumanState.Stunned) {
 			spriteRenderer.material = FlashMaterial;
 			MoveCharacter(Vector3.zero);
 			AnimateState(currentState, moveDirection);
 			return;
 		} else if (currentState == HumanState.Dead) {
+			if (diedFrame == 0) {
+				diedFrame = now;
+				GameObject deathScreen = HeadsUpDisplay.transform.Find("DeathScreen").gameObject;
+				deathScreen.SetActive(true);
+			} else if (now - diedFrame > 360) {
+				// RESPAWN by reloading the current scene.
+				SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+			}
 			spriteRenderer.material = DefaultMaterial;
 			MoveCharacter(Vector3.zero);
 			AnimateState(currentState, moveDirection);
@@ -250,6 +264,15 @@ public class CharacterControl : MonoBehaviour {
 
 		// Calculate the percentage of enemies that have been killed so far
 		float percent = (1-((float)numEnemies / (float)totalEnemies))*100;
+
+		if (percent >= 100) {
+			// Cleared this level
+			GameObject winScreen = HeadsUpDisplay.transform.Find("WinScreen").gameObject;
+			winScreen.SetActive(true);
+			generator.OnLevelCleared();
+			currentState = HumanState.Frozen;
+		}
+
 		int displayPercent = Mathf.RoundToInt(percent);
 
 		Text label = HeadsUpDisplay.transform.Find("ClearCount").GetComponent<Text>();

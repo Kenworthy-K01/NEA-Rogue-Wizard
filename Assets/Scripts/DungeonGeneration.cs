@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class DungeonGeneration : MonoBehaviour {
@@ -19,6 +20,7 @@ public class DungeonGeneration : MonoBehaviour {
 	private List<GameObject> enemyObjects = new List<GameObject>();
 
 	public int levelStartEnemies = 0;
+	private int levelClearedFrame = 0;
 
 	private void Start () {
 		// Generate rooms
@@ -67,6 +69,23 @@ public class DungeonGeneration : MonoBehaviour {
 
 		// Initially count the total number of enemies
 		levelStartEnemies = CountRemainingEnemies();
+	}
+
+	private void FixedUpdate() {
+		int now = Time.frameCount;
+		if (levelClearedFrame != 0 && now - levelClearedFrame > 360) {
+			string nextLevelId = "DungeonLevel"+level+1;
+
+			// Check if the next level exists
+			var scene = SceneManager.GetSceneByName(nextLevelId);
+			if (!scene.IsValid()) {
+				Debug.Log("You won the whole game.");
+				SceneManager.LoadScene("LegendaryWizardScene");
+				return;
+			}
+
+			SceneManager.LoadScene(nextLevelId);
+		}
 	}
 
 	private string GetRoomShape(Vector2 cell, List<Vector2> cellList) {
@@ -125,6 +144,11 @@ public class DungeonGeneration : MonoBehaviour {
 		}
 
 		return roomShape + exitString;
+	}
+
+	public void OnLevelCleared() {
+		int now = Time.frameCount;
+		levelClearedFrame = now;
 	}
 
 	private Vector2 GetRandomMove(Vector2 lastMove) {

@@ -145,7 +145,6 @@ public class CharacterControl : MonoBehaviour {
 			animator.SetBool("idle", false);
 			animator.SetBool("walking", true);
 		} else if (state == HumanState.Attacking) {
-			Debug.Log(mouseDirection);
 			float up = Vector2.Dot(mouseDirection, Vector2.up);
 			float right = Vector2.Dot(mouseDirection, Vector2.right);
 
@@ -238,5 +237,22 @@ public class CharacterControl : MonoBehaviour {
 
 		Vector3 knockback = new Vector3(0, 0, 0);
 		rigidBody.velocity = knockback;
+	}
+
+	public void UpdateClearCount() {
+		// Update the label to show what percent of enemies have been killed
+		// At 100% the level is complete
+
+		// Get the enemy counts from the dungeon generator
+		DungeonGeneration generator = GameObject.FindGameObjectWithTag("Generator").GetComponent<DungeonGeneration>();
+		int numEnemies = generator.CountRemainingEnemies();
+		int totalEnemies = generator.levelStartEnemies;
+
+		// Calculate the percentage of enemies that have been killed so far
+		float percent = (1-((float)numEnemies / (float)totalEnemies))*100;
+		int displayPercent = Mathf.RoundToInt(percent);
+
+		Text label = HeadsUpDisplay.transform.Find("ClearCount").GetComponent<Text>();
+		label.text = displayPercent.ToString() + "%";
 	}
 }

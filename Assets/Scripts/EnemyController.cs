@@ -47,8 +47,8 @@ public class EnemyController : MonoBehaviour {
 		
 		// State-specific behaviour
 		if (currentState == BrainState.Dead || currentState == BrainState.Idle) {
-			if (currentState == BrainState.Dead && now - diedAtFrame > 240) {
-				// We've been dead for 60 frames, cleanup the model
+			if (currentState == BrainState.Dead && now - diedAtFrame > 180) {
+				// We've been dead for 180 frames, cleanup the model
 				OnDeath();
 				return;
 			}
@@ -103,7 +103,10 @@ public class EnemyController : MonoBehaviour {
 
 	private void OnDeath() {
 		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		DungeonGeneration generator = GameObject.FindGameObjectWithTag("Generator").GetComponent<DungeonGeneration>();
 		// Reward player
+		generator.SendMessage("EnemyKilled", gameObject);
+		player.SendMessage("UpdateClearCount");
 		Attributes attr = player.GetComponent<Attributes>();
 		attr.AwardSkillPoints(3);
 

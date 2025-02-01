@@ -5,7 +5,7 @@ using UnityEngine;
 public class Health : MonoBehaviour {
 
 	private int MaxHealth = 100;
-	private int CurHealth = 0;
+	private int CurHealth = 1;
 
 	private Attributes attributes;
 

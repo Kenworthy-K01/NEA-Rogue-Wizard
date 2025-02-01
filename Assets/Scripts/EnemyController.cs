@@ -174,7 +174,6 @@ public class EnemyController : MonoBehaviour {
 		if (state == BrainState.Idle) {
 			animator.SetBool("idle", true);
 			animator.SetBool("walking", false);
-			return;
 		} else if (state == BrainState.Following) {
 			animator.SetBool("walking", true);
 			animator.SetBool("idle", false);

@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DungeonLevel1.unity
     guid: d197f6a7f83bc6042b8ae81be03b361a
+  - enabled: 1
+    path: Assets/Scenes/LegendaryWizardScene.unity
+    guid: ffab073d301a96243bcffa2ae57bf762
   m_configObjects: {}

@@ -27,7 +27,8 @@ public class CharacterControl : MonoBehaviour {
 	private Loadout spellLoadout; 
 	private bool sprinting = false;
 
-	private Vector2 mouseDirection;
+	private Vector2 mouseDirectionV2;
+	private Vector3 mouseDirectionV3;
 	private int stunStartFrame = 0;
 	private int diedFrame = 0;
 	private HumanState currentState = HumanState.Idle;
@@ -67,8 +68,8 @@ public class CharacterControl : MonoBehaviour {
 		Image fillImage = healthbar.GetComponent<Image>();
 		fillImage.fillAmount = ((float)health.GetCurrentHealth() / (float)health.GetMaxHealth(false));
 
-		Vector3 mouseDirectionV3 =(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position);
-		mouseDirection = new Vector2(mouseDirectionV3.x, mouseDirectionV3.y);
+		mouseDirectionV3 =(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position);
+		mouseDirectionV2 = new Vector2(mouseDirectionV3.x, mouseDirectionV3.y);
 
 		// Cleanup inactive attacks
 		if (activeAttack != null && spellLoadout.GetSpellCooldown(activeAttack.slot) == 0) {
@@ -106,6 +107,20 @@ public class CharacterControl : MonoBehaviour {
 			} else {
 				MoveCharacter(Vector3.zero);
 			}
+		}  else if (currentState == HumanState.Attacking) {
+			moveDirection = MoveCharacter(Vector3.zero);
+
+			if (activeAttack != null) {
+				List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
+				foreach (GameObject hit in targets) {
+					if (activeAttack.HasHitTarget(hit)) { continue; }
+					activeAttack.HitTarget(hit);
+					Health targetHp = hit.GetComponent<Health>();
+					int damage = activeAttack.CalculateDamage(hit);
+					targetHp.TakeDamage(damage);
+					Knockback(hit);
+				}
+			}
 		} else if (currentState == HumanState.Walking) {
 			Vector3 inputDirection = GetInputMoveDirection();
 			if (inputDirection.magnitude == 0 || !WALKENABLED) {
@@ -114,22 +129,19 @@ public class CharacterControl : MonoBehaviour {
 				WALKSPEED = attributes.CalculateWalkSpeed();
 				moveDirection = MoveCharacter(inputDirection);
 			}
-		} else if (currentState == HumanState.Attacking) {
-			if (activeAttack != null) {
-				List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
-				foreach (GameObject hit in targets) {
-					if (activeAttack.HasHitTargetWithinFrames(hit, 13)) { continue; }
-					activeAttack.HitTarget(hit);
-					Health targetHp = hit.GetComponent<Health>();
-					int damage = activeAttack.CalculateDamage(hit);
-					targetHp.TakeDamage(damage);
-				}
-			}
 		}
 
 		spriteRenderer.material = DefaultMaterial;
 		AnimateState(currentState, moveDirection);
 		HandleCastInput();
+	}
+
+	private void Knockback(GameObject entity) {
+		Vector3 dir = (entity.transform.position - transform.position);
+		dir.Normalize();
+
+		Rigidbody2D rb = entity.GetComponent<Rigidbody2D>();
+		rb.velocity = dir * 7;
 	}
 
 	private HumanState GetHumanState(int now) {
@@ -139,10 +151,10 @@ public class CharacterControl : MonoBehaviour {
 			state = HumanState.Dead;
 		} else if (now - stunStartFrame < 5) {
 			state = HumanState.Stunned;
-		} else if (GetInputMoveDirection().magnitude > 0) {
-			state = HumanState.Walking;
 		} else if (activeAttack != null) {
 			state = HumanState.Attacking;
+		} else if (GetInputMoveDirection().magnitude > 0) {
+			state = HumanState.Walking;
 		}
 
 		return state;
@@ -153,6 +165,18 @@ public class CharacterControl : MonoBehaviour {
 		if (state == HumanState.Idle) {
 			animator.SetBool("idle", true);
 			animator.SetBool("walking", false);
+		}  else if (state == HumanState.Attacking) {
+			float up = Vector2.Dot(mouseDirectionV2, Vector2.up);
+			float right = Vector2.Dot(mouseDirectionV2, Vector2.right);
+
+			if (Mathf.Abs(right) > 0.3) {
+				spriteRenderer.flipX = (right < -0.5);
+				animator.Play("Player_AttackRight");
+			} else if (up < -0.5) {
+				animator.Play("Player_AttackDown");
+			} else if (up > 0.5) {
+				animator.Play("Player_AttackUp");
+			}
 		} else if (state == HumanState.Walking) {
 			float up = Vector2.Dot(moveDirection, Vector2.up);
 			float right = Vector2.Dot(moveDirection, Vector2.right);
@@ -171,18 +195,6 @@ public class CharacterControl : MonoBehaviour {
 
 			animator.SetBool("idle", false);
 			animator.SetBool("walking", true);
-		} else if (state == HumanState.Attacking) {
-			float up = Vector2.Dot(mouseDirection, Vector2.up);
-			float right = Vector2.Dot(mouseDirection, Vector2.right);
-
-			if (up > 0.5) {
-				animator.Play("Player_AttackUp");
-			} else if (up < -0.5) {
-				animator.Play("Player_AttackDown");
-			} else {
-				spriteRenderer.flipX = (right < -0.5);
-				animator.Play("Player_AttackRight");
-			}
 		} else if (state == HumanState.Stunned) {
 			//	animator.Play("Stun");
 		} else if (state == HumanState.Dead) {
@@ -235,7 +247,7 @@ public class CharacterControl : MonoBehaviour {
 		if (String.IsNullOrEmpty(spellId)) { return; } 
 		if (activeAttack != null) { return; }
 
-		spellLoadout.SpellStartCooldown(slot, 1);
+		spellLoadout.SpellStartCooldown(slot, 1f/2f);
 
 		hurtbox.enabled = true;
 
@@ -246,9 +258,23 @@ public class CharacterControl : MonoBehaviour {
 		activeAttack.scaleType = ScaleType.Strength;
 		activeAttack.armorPenetration = 0;
 
-		Vector3 vfxPoint = transform.position;
+		Vector3 dir = mouseDirectionV3;
+		dir.z = 0;
+		dir.Normalize();
+		Vector3 vfxPoint = transform.position + (dir)*2;
+
+		// REFERENCE: UNITY DOCS QUATERNION ROTATION
+		Vector3 relPoint = transform.position - vfxPoint;
+		Vector3 lookVector = new Vector3(relPoint.y, -relPoint.x, 0) * Mathf.Sign(-relPoint.x);
+		Quaternion vfxRot = Quaternion.LookRotation(-Vector3.forward, lookVector);
+		// END REFERENCE
+
+		GameObject attkHurtbox = transform.Find("Hurtbox").gameObject;
+		attkHurtbox.transform.position = vfxPoint - dir;
+		attkHurtbox.transform.rotation = vfxRot;
+
 		GameObject spellFX = Resources.Load<GameObject>("VisualEffects/" + spellId);
-		activeSpellVFX = Instantiate(spellFX, vfxPoint, Quaternion.identity);
+		activeSpellVFX = Instantiate(spellFX, vfxPoint, vfxRot);
 		activeSpellVFX.transform.SetParent(gameObject.transform);
 	}
 

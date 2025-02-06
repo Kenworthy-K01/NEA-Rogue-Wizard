@@ -23,17 +23,11 @@ public class Attack {
 		return (int)baseDamage;
 	}
 
-	public bool HasHitTargetWithinFrames(GameObject target, int frames) {
+	public bool HasHitTarget(GameObject target) {
 		// Target hasn't been hit at all
 		if (!targetLastHit.ContainsKey(target)) { return false; }
 
-		int lastHitFrame = targetLastHit[target];
-		// Target was hit within this frame
-		if (Time.frameCount - lastHitFrame <= frames) {
-			return true;
-		}
-		// Target was hit earlier than this frame
-		return false;
+		return true;
 	}
 
 	public void HitTarget(GameObject target) {

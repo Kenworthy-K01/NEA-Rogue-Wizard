@@ -67,7 +67,6 @@ public class EnemyController : MonoBehaviour {
 				MoveCharacter();
 			}
 		} else if (currentState == BrainState.Attacking) {
-			// Create hitbox on 10th frame, destroy it on 24th
 			moveDirection = Vector3.zero;
 			MoveCharacter();
 
@@ -88,7 +87,7 @@ public class EnemyController : MonoBehaviour {
 					List<GameObject> targets = hurtbox.GetObjectsInBoxBounds();
 					foreach (GameObject hit in targets) {
 						// Have we already hit this target
-						if (activeAttack.HasHitTargetWithinFrames(hit, 24)) { continue; }
+						if (activeAttack.HasHitTarget(hit)) { continue; }
 						activeAttack.HitTarget(hit);
 
 						// Deal damage

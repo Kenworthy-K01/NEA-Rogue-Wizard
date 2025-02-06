@@ -29,7 +29,6 @@ public class CharacterControl : MonoBehaviour {
 
 	private Vector2 mouseDirection;
 	private int stunStartFrame = 0;
-	private int attackStartFrame = 0;
 	private int diedFrame = 0;
 	private HumanState currentState = HumanState.Idle;
 	private Attack activeAttack;
@@ -51,14 +50,28 @@ public class CharacterControl : MonoBehaviour {
 		int now = Time.frameCount;
 		currentState = GetHumanState(now);
 
+		// Update attack button cooldown displays
+		Transform AttackCtrls = HeadsUpDisplay.transform.Find("AttackControls");
+		Image m1Cd = AttackCtrls.Find("M1").Find("Cooldown").gameObject.GetComponent<Image>();
+		Image qCd = AttackCtrls.Find("Q").Find("Cooldown").gameObject.GetComponent<Image>();
+		Image eCd = AttackCtrls.Find("E").Find("Cooldown").gameObject.GetComponent<Image>();
+		Image rCd = AttackCtrls.Find("R").Find("Cooldown").gameObject.GetComponent<Image>();
+
+		m1Cd.fillAmount = spellLoadout.GetSpellCooldown(0);
+		qCd.fillAmount = spellLoadout.GetSpellCooldown(1);
+		eCd.fillAmount = spellLoadout.GetSpellCooldown(2);
+		rCd.fillAmount = spellLoadout.GetSpellCooldown(3);
+
+		// Update healthbar
 		GameObject healthbar = HeadsUpDisplay.transform.Find("HealthBarFill").gameObject;
 		Image fillImage = healthbar.GetComponent<Image>();
 		fillImage.fillAmount = ((float)health.GetCurrentHealth() / (float)health.GetMaxHealth(false));
 
 		Vector3 mouseDirectionV3 =(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position);
 		mouseDirection = new Vector2(mouseDirectionV3.x, mouseDirectionV3.y);
-			
-		if (activeAttack != null && now - attackStartFrame > 13) {
+
+		// Cleanup inactive attacks
+		if (activeAttack != null && spellLoadout.GetSpellCooldown(activeAttack.slot) == 0) {
 			currentState = HumanState.Idle;
 			CleanupActiveAttack();
 		}
@@ -205,26 +218,29 @@ public class CharacterControl : MonoBehaviour {
 	// Spell Casting
 	private void HandleCastInput() {
 		if (Input.GetKeyDown(KeyCode.Mouse0)) {
-			CastAttack(1);
+			CastAttack(0);
 		} else if (Input.GetKeyDown(KeyCode.Q)) {
-			CastAttack(2);
+			CastAttack(1);
 		} else if (Input.GetKeyDown(KeyCode.E)) {
-			CastAttack(3);
+			CastAttack(2);
 		} else if (Input.GetKeyDown(KeyCode.R)) {
-			CastAttack(4);
+			CastAttack(3);
 		}
 	}
 
 	private void CastAttack(int slot) {
+		if (spellLoadout.GetSpellCooldown(slot) != 0) { return; }
+
 		string spellId = spellLoadout.GetSpellIdFromSlot(slot);
 		if (String.IsNullOrEmpty(spellId)) { return; } 
 		if (activeAttack != null) { return; }
 
-		attackStartFrame = Time.frameCount;
-		
+		spellLoadout.SpellStartCooldown(slot, 1);
+
 		hurtbox.enabled = true;
 
 		activeAttack = new Attack();
+		activeAttack.slot = slot;
 		activeAttack.baseDamage = 15;
 		activeAttack.scaling = 1;
 		activeAttack.scaleType = ScaleType.Strength;
@@ -240,7 +256,6 @@ public class CharacterControl : MonoBehaviour {
 		Destroy(activeSpellVFX);
 		hurtbox.enabled = false;
 
-		attackStartFrame = 0;
 		activeSpellVFX = null;
 		activeAttack = null;
 	}

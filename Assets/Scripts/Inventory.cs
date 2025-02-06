@@ -2,25 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Inventory : MonoBehaviour {
 
 	GameObject HeadsUpDisplay;
 	GameObject SPLabel;
 	GameObject InventoryCanvas;
+	GameObject ControlLabel;
 
 	Attributes playerAttr;
 
 	bool isOpen = false;
 
 	private void Start() {
+		// Get all UI objects
 		HeadsUpDisplay = GameObject.FindGameObjectWithTag("HUD");
 		SPLabel = HeadsUpDisplay.transform.Find("SPLabel").gameObject;
 		InventoryCanvas = HeadsUpDisplay.transform.Find("Inventory").gameObject;
+		ControlLabel = HeadsUpDisplay.transform.Find("TabBtn").gameObject;
 		playerAttr = GetComponent<Attributes>();
 	}
 
 	private void Update() {
+		// Manage visibility of UI elements
 		SPLabel.SetActive(playerAttr.skillPoints > 0);
 
 		if (Input.GetKeyDown(KeyCode.Tab)) {
@@ -29,16 +34,20 @@ public class Inventory : MonoBehaviour {
 	}
 
 	private void ToggleInventory() {
+		// Toggle visibility and time scale to pause game
 		if (isOpen) {
 			isOpen = false;
 		} else {
 			UpdateAttributeLabels();
 			isOpen = true;
 		}
+		Time.timeScale = isOpen ? 0 : 1;
+		ControlLabel.SetActive(!isOpen);
 		InventoryCanvas.SetActive(isOpen);
 	}
 
 	private void UpdateAttributeLabels() {
+		// Update the display values of each attribute
 		Transform container = InventoryCanvas.transform.Find("Container");
 		Text pointLabel = container.Find("SkillPoints").gameObject.GetComponent<Text>();
 		Text strLabel = container.Find("Strength").gameObject.GetComponent<Text>();
@@ -56,6 +65,7 @@ public class Inventory : MonoBehaviour {
 	}
 
 	public void SpendSkillPoint(string attribute) {
+		// 
 		if (!isOpen || playerAttr.skillPoints < 1) { return; }
 		if (attribute == "strength") {
 			playerAttr.SetStrength(playerAttr.strength + 1);
@@ -71,4 +81,8 @@ public class Inventory : MonoBehaviour {
 		UpdateAttributeLabels();
 	}
 
+	public void QuitGame() {
+		Time.timeScale = 1;
+		SceneManager.LoadScene("MainMenu");
+	}
 }

@@ -4,24 +4,29 @@ using UnityEngine;
 
 public class Loadout : MonoBehaviour {
 
-	public string spellId1 = "";
-	public string spellId2 = "";
-	public string spellId3 = "";
-	public string spellId4 = "";
+	public string[] spells;
 
-	public string GetSpellIdFromSlot(int slot) {
-		switch (slot) {
-			case 1:
-				return spellId1;
-			case 2:
-				return spellId2;
-			case 3:
-				return spellId3;
-			case 4:
-				return spellId4;
-			default:
-				return spellId1;
+	private float[] cooldowns = new float[] {0f, 0f, 0f, 0f};
+
+	private void Update() {
+		for (int i = 0; i < cooldowns.Length; i++) {
+			if (cooldowns[i] == 0) { continue; }
+			cooldowns[i] = cooldowns[i] - Time.deltaTime;
+			if (cooldowns[i] <= 0) {
+				cooldowns[i] = 0;
+			}
 		}
 	}
 
+	public string GetSpellIdFromSlot(int slot) {
+		return spells[slot];
+	}
+
+	public void SpellStartCooldown(int slot, float cooldown) {
+		cooldowns[slot] = cooldown;
+	}
+
+	public float GetSpellCooldown(int slot) {
+		return cooldowns[slot];
+	}
 }

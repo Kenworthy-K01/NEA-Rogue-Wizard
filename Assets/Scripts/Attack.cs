@@ -6,6 +6,7 @@ public enum ScaleType { None, Strength, Fortitude, Agility, Intelligence, Charis
 
 public class Attack {
 
+	public int slot = 1;
 	public float baseDamage = 0;
 	public float scaling = 0;
 	public float armorPenetration = 0;

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class CharacterControl : MonoBehaviour {
 
@@ -13,6 +14,11 @@ public class CharacterControl : MonoBehaviour {
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
 	public Material FlashMaterial;
+
+	public AudioClip[] attackSounds;
+	public AudioClip[] damageSounds;
+	public AudioClip deathSound;
+
 	private Material DefaultMaterial;
 	private int SPRINTBOOST = 3;
 
@@ -24,7 +30,8 @@ public class CharacterControl : MonoBehaviour {
 	private Health health;
 	private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
-	private Loadout spellLoadout; 
+	private Loadout spellLoadout;
+	private AudioSource sounds;
 	private bool sprinting = false;
 
 	private Vector2 mouseDirectionV2;
@@ -44,6 +51,7 @@ public class CharacterControl : MonoBehaviour {
 		attributes = GetComponent<Attributes>();
 		health = GetComponent<Health>();
 		spellLoadout = GetComponent<Loadout>();
+		sounds = GetComponent<AudioSource>();
 		DefaultMaterial = spriteRenderer.material;
 	}
 	
@@ -141,7 +149,7 @@ public class CharacterControl : MonoBehaviour {
 		dir.Normalize();
 
 		Rigidbody2D rb = entity.GetComponent<Rigidbody2D>();
-		rb.velocity = dir * 7;
+		rb.velocity = dir * 6;
 	}
 
 	private HumanState GetHumanState(int now) {
@@ -247,6 +255,8 @@ public class CharacterControl : MonoBehaviour {
 		if (String.IsNullOrEmpty(spellId)) { return; } 
 		if (activeAttack != null) { return; }
 
+		sounds.clip = attackSounds[Random.Range(0, attackSounds.Length)];
+		sounds.Play();
 		spellLoadout.SpellStartCooldown(slot, 1f/2f);
 
 		hurtbox.enabled = true;
@@ -264,8 +274,8 @@ public class CharacterControl : MonoBehaviour {
 		Vector3 vfxPoint = transform.position + (dir)*2;
 
 		// REFERENCE: UNITY DOCS QUATERNION ROTATION
-		Vector3 relPoint = transform.position - vfxPoint;
-		Vector3 lookVector = new Vector3(relPoint.y, -relPoint.x, 0) * Mathf.Sign(-relPoint.x);
+		Vector3 relPoint = vfxPoint - transform.position;
+		Vector3 lookVector = new Vector3(relPoint.y, -relPoint.x, 0);// * Mathf.Sign(-relPoint.x);
 		Quaternion vfxRot = Quaternion.LookRotation(-Vector3.forward, lookVector);
 		// END REFERENCE
 
@@ -287,11 +297,11 @@ public class CharacterControl : MonoBehaviour {
 	}
 
 	private void HitStun() {
+		sounds.clip = damageSounds[Random.Range(0, damageSounds.Length)];
+		sounds.Play();
+
 		stunStartFrame = Time.frameCount;
 		spriteRenderer.material = FlashMaterial;
-
-		Vector3 knockback = new Vector3(0, 0, 0);
-		rigidBody.velocity = knockback;
 	}
 
 	public void UpdateClearCount() {

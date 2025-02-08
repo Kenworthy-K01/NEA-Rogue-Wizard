@@ -8,7 +8,7 @@ public class EnemyController : MonoBehaviour {
 	private enum BrainState { Idle, Following, Attacking, Stunned, Dead };
 
 	// Enemy Configs
-	public int WALKSPEED = 2;
+	public float WALKSPEED = 2f;
 	public bool WALKENABLED = true;
 	public int AGGRORANGE = 15;
 
@@ -19,6 +19,7 @@ public class EnemyController : MonoBehaviour {
 	private Rigidbody2D rigidBody;
 	private SpriteRenderer spriteRenderer;
 	private Health health;
+	private StatusEffect currentStatusEffect = StatusEffect.None;
 
 	// Changing states and attributes
 	private Attack activeAttack;
@@ -27,6 +28,7 @@ public class EnemyController : MonoBehaviour {
 	private GameObject aggroTarget;
 	private int attackStartFrame = 0;
 	private int stunStartFrame = 0;
+	private int statusStartFrame = 0;
 	private int diedAtFrame = 0;
 
 	void Start () {
@@ -44,6 +46,27 @@ public class EnemyController : MonoBehaviour {
 		AnimateState(currentState);
 
 		int now = Time.frameCount;
+
+		float WalkSpeedMult = 1;
+		
+		if (currentStatusEffect != StatusEffect.None) {
+			if (now - statusStartFrame > 60) {
+				ClearStatusEffects();
+			} else {
+				switch (currentStatusEffect) {
+					case StatusEffect.Burn:
+					case StatusEffect.Poison:
+						health.TakeDamage(1 / 16 * health.GetMaxHealth(false));
+						break;
+					case StatusEffect.Chill:
+						WalkSpeedMult = 1f / 2f;
+						break;
+					case StatusEffect.Shock:
+						WalkSpeedMult = 0;
+						break;
+				}
+			}
+		}
 		
 		// State-specific behaviour
 		if (currentState == BrainState.Dead || currentState == BrainState.Idle) {
@@ -61,7 +84,7 @@ public class EnemyController : MonoBehaviour {
 			}
 		} else if (currentState == BrainState.Following) {
 			// Move toward aggro target & update walk speed
-			WALKSPEED = attributes.CalculateWalkSpeed();
+			WALKSPEED = attributes.CalculateWalkSpeed() * WalkSpeedMult;
 			if (WALKENABLED) {
 				UpdateMoveDirection();
 				MoveCharacter();
@@ -73,7 +96,7 @@ public class EnemyController : MonoBehaviour {
 			if (activeAttack == null) {
 				attackStartFrame = now;
 
-				activeAttack = new Attack();
+				activeAttack = gameObject.AddComponent<Attack>();
 				activeAttack.baseDamage = 10;
 				activeAttack.scaling = 1;
 				activeAttack.scaleType = ScaleType.Strength;
@@ -114,6 +137,7 @@ public class EnemyController : MonoBehaviour {
 
 	private void CleanupAttack() {
 		//currentState = BrainState.Idle;
+		Destroy(activeAttack);
 		activeAttack = null;
 	}
 
@@ -201,12 +225,33 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	// Inflict "Stunned" when hit
-	private void HitStun() {
+	private void HitStun(StatusEffect applyStatus) {
 		if (currentState == BrainState.Dead) { return; }
 		// Inflict stun when hit
 		stunStartFrame = Time.frameCount;
 		currentState = BrainState.Stunned;
 		animator.Play("Skeleton_Hit");
+
+		ApplyStatusEffect(applyStatus);
+	}
+
+	private void ApplyStatusEffect(StatusEffect newStatus) {
+		if (newStatus == StatusEffect.None || newStatus == currentStatusEffect) {
+			return;
+		}
+		GameObject vfx = Resources.Load<GameObject>("VisualEffects/Debuff");//+currentStatusEffect.ToString());
+		GameObject vfxInstance = Instantiate(vfx, transform.position, Quaternion.identity);
+		vfxInstance.transform.SetParent(transform);
+		
+		statusStartFrame = Time.frameCount;
+		currentStatusEffect = newStatus;
+	}
+
+	private void ClearStatusEffects() {
+		currentStatusEffect = StatusEffect.None;
+
+		GameObject vfx = transform.Find("Debuff" + "(Clone)").gameObject;
+		Destroy(vfx);
 	}
 
 	// Update rigidBody velocity in moveDirection

@@ -18,7 +18,7 @@ public class MainMenu : MonoBehaviour {
 	}
 
 	public void OnPlayBtnClicked() {
-		SceneManager.LoadScene("DungeonLevel1");
+		SceneManager.LoadScene("Tutorial");
 	}
 
 	public void OnControlsBtnClicked() {

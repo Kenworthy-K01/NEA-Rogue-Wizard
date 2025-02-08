@@ -24,6 +24,7 @@ public class DungeonGeneration : MonoBehaviour {
 
 	private void Start () {
 		// Generate rooms
+		if (level == 0 || complexity == 0) { return; }
 
 		AddLevelRoom("Start", Vector3.zero);
 
@@ -74,11 +75,11 @@ public class DungeonGeneration : MonoBehaviour {
 	private void FixedUpdate() {
 		int now = Time.frameCount;
 		if (levelClearedFrame != 0 && now - levelClearedFrame > 360) {
-			string nextLevelId = "DungeonLevel"+level+1;
+			string nextLevelId = "DungeonLevel"+ (level+1);
 
 			// Check if the next level exists
-			var scene = SceneManager.GetSceneByName(nextLevelId);
-			if (!scene.IsValid()) {
+			int buildIndex = SceneUtility.GetBuildIndexByScenePath(nextLevelId);
+			if (buildIndex == -1) {
 				Debug.Log("You won the whole game.");
 				SceneManager.LoadScene("LegendaryWizardScene");
 				return;
@@ -174,7 +175,7 @@ public class DungeonGeneration : MonoBehaviour {
 			GameObject entityOriginal = Resources.Load<GameObject>("Entities/" + enemyId);
 			Vector3 atPosition = room.transform.Find("SpawnPoint" + Random.Range(1, 3)).position;
 			GameObject entityInstance = Instantiate(entityOriginal, atPosition, Quaternion.identity);
-			enemyObjects.Add(entityInstance);
+			AddEnemy(entityInstance);
 		}
 	}
 
@@ -186,6 +187,11 @@ public class DungeonGeneration : MonoBehaviour {
 		if (!enemyObjects.Contains(enemy)) { return; } // Enemy not in table
 
 		enemyObjects.Remove(enemy);
+	}
+
+	public void AddEnemy(GameObject enemy) {
+		enemyObjects.Add(enemy);
+		levelStartEnemies += 1;
 	}
 
 	private GameObject AddLevelRoom(string roomId, Vector3 atPosition) {

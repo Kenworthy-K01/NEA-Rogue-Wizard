@@ -40,7 +40,7 @@ public class CharacterControl : MonoBehaviour {
 	private int diedFrame = 0;
 	private HumanState currentState = HumanState.Idle;
 	private Attack activeAttack;
-	private GameObject activeSpellVFX;
+	private GameObject activeSpellObj;
 
 	void Start () {
 		HeadsUpDisplay = GameObject.FindGameObjectWithTag("HUD");
@@ -66,10 +66,19 @@ public class CharacterControl : MonoBehaviour {
 		Image eCd = AttackCtrls.Find("E").Find("Cooldown").gameObject.GetComponent<Image>();
 		Image rCd = AttackCtrls.Find("R").Find("Cooldown").gameObject.GetComponent<Image>();
 
-		m1Cd.fillAmount = spellLoadout.GetSpellCooldown(0);
-		qCd.fillAmount = spellLoadout.GetSpellCooldown(1);
-		eCd.fillAmount = spellLoadout.GetSpellCooldown(2);
-		rCd.fillAmount = spellLoadout.GetSpellCooldown(3);
+		// Update Attack vfx & Cleanup if done
+		if (activeAttack != null) {
+			if (spellLoadout.GetSpellCooldown(activeAttack.slot) == 0) {
+				currentState = HumanState.Idle;
+				CleanupActiveAttack();
+			} else {
+				UpdateAttackPosition(activeSpellObj);
+				m1Cd.fillAmount = spellLoadout.GetSpellCooldown(0) / activeAttack.cooldown;
+				qCd.fillAmount = spellLoadout.GetSpellCooldown(1) / activeAttack.cooldown;
+				eCd.fillAmount = spellLoadout.GetSpellCooldown(2) / activeAttack.cooldown;
+				rCd.fillAmount = spellLoadout.GetSpellCooldown(3) / activeAttack.cooldown;
+			}
+		}
 
 		// Update healthbar
 		GameObject healthbar = HeadsUpDisplay.transform.Find("HealthBarFill").gameObject;
@@ -78,13 +87,7 @@ public class CharacterControl : MonoBehaviour {
 
 		mouseDirectionV3 =(Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position);
 		mouseDirectionV2 = new Vector2(mouseDirectionV3.x, mouseDirectionV3.y);
-
-		// Cleanup inactive attacks
-		if (activeAttack != null && spellLoadout.GetSpellCooldown(activeAttack.slot) == 0) {
-			currentState = HumanState.Idle;
-			CleanupActiveAttack();
-		}
-
+		
 		Vector3 moveDirection = Vector3.zero;
 
 		// Frozen state for manual control only
@@ -249,25 +252,33 @@ public class CharacterControl : MonoBehaviour {
 	}
 
 	private void CastAttack(int slot) {
+		if (!WALKENABLED) { return; }
 		if (spellLoadout.GetSpellCooldown(slot) != 0) { return; }
 
 		string spellId = spellLoadout.GetSpellIdFromSlot(slot);
 		if (String.IsNullOrEmpty(spellId)) { return; } 
 		if (activeAttack != null) { return; }
 
+		GameObject spellObj = Resources.Load<GameObject>("VisualEffects/" + spellId);
+		
 		sounds.clip = attackSounds[Random.Range(0, attackSounds.Length)];
 		sounds.Play();
-		spellLoadout.SpellStartCooldown(slot, 1f/2f);
 
+		GameObject attkHurtbox = hurtbox.gameObject;
+		UpdateAttackPosition(attkHurtbox);
+		
 		hurtbox.enabled = true;
-
-		activeAttack = new Attack();
+		
+		activeSpellObj = Instantiate(spellObj, Vector3.zero, Quaternion.identity, transform);
+		UpdateAttackPosition(activeSpellObj);
+		
+		activeAttack = activeSpellObj.GetComponent<Attack>();
 		activeAttack.slot = slot;
-		activeAttack.baseDamage = 15;
-		activeAttack.scaling = 1;
-		activeAttack.scaleType = ScaleType.Strength;
-		activeAttack.armorPenetration = 0;
+		
+		spellLoadout.SpellStartCooldown(slot, activeAttack.cooldown);
+	}
 
+	private void UpdateAttackPosition(GameObject attackVFX) {
 		Vector3 dir = mouseDirectionV3;
 		dir.z = 0;
 		dir.Normalize();
@@ -279,20 +290,15 @@ public class CharacterControl : MonoBehaviour {
 		Quaternion vfxRot = Quaternion.LookRotation(-Vector3.forward, lookVector);
 		// END REFERENCE
 
-		GameObject attkHurtbox = transform.Find("Hurtbox").gameObject;
-		attkHurtbox.transform.position = vfxPoint - dir;
-		attkHurtbox.transform.rotation = vfxRot;
-
-		GameObject spellFX = Resources.Load<GameObject>("VisualEffects/" + spellId);
-		activeSpellVFX = Instantiate(spellFX, vfxPoint, vfxRot);
-		activeSpellVFX.transform.SetParent(gameObject.transform);
+		attackVFX.transform.position = vfxPoint;
+		attackVFX.transform.rotation = vfxRot;
 	}
 
 	private void CleanupActiveAttack() {
-		Destroy(activeSpellVFX);
+		Destroy(activeSpellObj);
 		hurtbox.enabled = false;
 
-		activeSpellVFX = null;
+		activeSpellObj = null;
 		activeAttack = null;
 	}
 
@@ -327,6 +333,6 @@ public class CharacterControl : MonoBehaviour {
 		int displayPercent = Mathf.RoundToInt(percent);
 
 		Text label = HeadsUpDisplay.transform.Find("ClearCount").GetComponent<Text>();
-		label.text = displayPercent.ToString() + "%";
+		label.text = displayPercent + "%";
 	}
 }

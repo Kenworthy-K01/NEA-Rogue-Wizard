@@ -152,6 +152,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1859999578563278, guid: 7196110ab7c06c44dafe397e27c65291, type: 2}
+      propertyPath: m_TagString
+      value: Hitbox
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7196110ab7c06c44dafe397e27c65291, type: 2}
   m_IsPrefabAsset: 0

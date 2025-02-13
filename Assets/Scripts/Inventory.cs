@@ -6,12 +6,18 @@ using UnityEngine.SceneManagement;
 
 public class Inventory : MonoBehaviour {
 
-	GameObject HeadsUpDisplay;
-	GameObject SPLabel;
-	GameObject InventoryCanvas;
-	GameObject ControlLabel;
+	private GameObject HeadsUpDisplay;
+	private GameObject SPLabel;
+	private GameObject InventoryCanvas;
+	private GameObject ControlLabel;
+	private GameObject relicIcon;
+	private GameObject curseIcon;
 
-	Attributes playerAttr;
+	private Relic equippedRelic;
+	private Relic equippedCurse;
+
+	private Attributes playerAttr;
+	private Health playerHealth;
 
 	bool isOpen = false;
 
@@ -21,7 +27,10 @@ public class Inventory : MonoBehaviour {
 		SPLabel = HeadsUpDisplay.transform.Find("SPLabel").gameObject;
 		InventoryCanvas = HeadsUpDisplay.transform.Find("Inventory").gameObject;
 		ControlLabel = HeadsUpDisplay.transform.Find("TabBtn").gameObject;
+		relicIcon = InventoryCanvas.transform.Find("Container").Find("RelicIcon").gameObject;
+		curseIcon = InventoryCanvas.transform.Find("Container").Find("CurseIcon").gameObject;
 		playerAttr = GetComponent<Attributes>();
+		playerHealth = GetComponent<Health>();
 	}
 
 	private void Update() {
@@ -30,6 +39,14 @@ public class Inventory : MonoBehaviour {
 
 		if (Input.GetKeyDown(KeyCode.Tab)) {
 			ToggleInventory();
+		}
+	}
+
+	public void EquipRelic(Relic relic) {
+		if (relic.cursed) {
+			equippedCurse = relic;
+		} else {
+			equippedRelic = relic;
 		}
 	}
 
@@ -62,6 +79,15 @@ public class Inventory : MonoBehaviour {
 		aglLabel.text = playerAttr.agility.ToString();
 		intLabel.text = playerAttr.intelligence.ToString();
 		chrLabel.text = playerAttr.charisma.ToString();
+
+		if (equippedRelic != null) {
+			Image icon = relicIcon.GetComponent<Image>();
+			icon.sprite = equippedRelic.GetIconSprite();
+		}
+		if (equippedCurse != null) {
+			Image icon = curseIcon.GetComponent<Image>();
+			icon.sprite = equippedCurse.GetIconSprite();
+		}
 	}
 
 	public void SpendSkillPoint(string attribute) {
@@ -71,6 +97,8 @@ public class Inventory : MonoBehaviour {
 			playerAttr.SetStrength(playerAttr.strength + 1);
 		} else if (attribute == "fortitude") {
 			playerAttr.SetFortitude(playerAttr.fortitude + 1);
+			playerHealth.GetMaxHealth(true);
+			playerHealth.ApplyHealing(2);
 		} else if (attribute == "agility") {
 			playerAttr.SetAgility(playerAttr.agility + 1);
 		} else if (attribute == "intelligence") {

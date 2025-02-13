@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemyController : MonoBehaviour {
 
@@ -124,6 +125,8 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	private void OnDeath() {
+		DropRelic();
+
 		GameObject player = GameObject.FindGameObjectWithTag("Player");
 		DungeonGeneration generator = GameObject.FindGameObjectWithTag("Generator").GetComponent<DungeonGeneration>();
 		// Reward player
@@ -239,7 +242,8 @@ public class EnemyController : MonoBehaviour {
 		if (newStatus == StatusEffect.None || newStatus == currentStatusEffect) {
 			return;
 		}
-		GameObject vfx = Resources.Load<GameObject>("VisualEffects/Debuff");//+currentStatusEffect.ToString());
+		ClearStatusEffects();
+		GameObject vfx = Resources.Load<GameObject>("VisualEffects/"+newStatus.ToString());
 		GameObject vfxInstance = Instantiate(vfx, transform.position, Quaternion.identity);
 		vfxInstance.transform.SetParent(transform);
 		
@@ -248,10 +252,10 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	private void ClearStatusEffects() {
-		currentStatusEffect = StatusEffect.None;
-
-		GameObject vfx = transform.Find("Debuff" + "(Clone)").gameObject;
+		if (currentStatusEffect == StatusEffect.None) { return; }
+		GameObject vfx = transform.Find(currentStatusEffect.ToString() + "(Clone)").gameObject;
 		Destroy(vfx);
+		currentStatusEffect = StatusEffect.None;
 	}
 
 	// Update rigidBody velocity in moveDirection
@@ -260,5 +264,13 @@ public class EnemyController : MonoBehaviour {
 
 		// Translate Character in this direction
 		rigidBody.velocity = moveVector;
+	}
+
+	private void DropRelic() {
+		//if (Random.Range(1, 100) > 30) { return; }
+		string[] relics = {"VampiricRing", "IronBall"};
+		string relicId = relics[Random.Range(0, relics.Length-1)];
+		GameObject relicObj = Resources.Load<GameObject>("Relics/" + relicId);
+		Instantiate(relicObj, transform.position, Quaternion.identity);
 	}
 }

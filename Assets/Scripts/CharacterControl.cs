@@ -53,6 +53,9 @@ public class CharacterControl : MonoBehaviour {
 		spellLoadout = GetComponent<Loadout>();
 		sounds = GetComponent<AudioSource>();
 		DefaultMaterial = spriteRenderer.material;
+
+		DontDestroyOnLoad(gameObject);
+		transform.position = Vector3.zero;
 	}
 	
 	void FixedUpdate () {

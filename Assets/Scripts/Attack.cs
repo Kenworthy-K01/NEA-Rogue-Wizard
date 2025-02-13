@@ -35,7 +35,7 @@ public class Attack : MonoBehaviour {
 		Inventory inv = target.GetComponentInChildren<Inventory>();
 		if (inv != null) {
 			Relic curse = inv.GetEquippedCurse();
-			if (curse.relicId == "Blood Dagger") {
+			if (curse != null && curse.relicId == "Blood Dagger") {
 				damage *= 1.2f;
 			}
 		}

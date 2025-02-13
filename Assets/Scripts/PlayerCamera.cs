@@ -12,6 +12,12 @@ public class PlayerCamera : MonoBehaviour {
 	
 	private Vector3 positionTarget;
 
+	private void Start() {
+		if (cameraSubject == null) {
+			cameraSubject = GameObject.FindGameObjectWithTag("Player");
+		}
+	}
+
 	private void FixedUpdate () {
 		// Default camera type "Follow", will follow the camera subject smoothly.
 		// Alt camera type "Scriptable", will not automatically update the camera.

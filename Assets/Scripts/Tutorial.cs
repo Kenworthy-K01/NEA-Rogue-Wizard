@@ -78,8 +78,8 @@ public class Tutorial : MonoBehaviour {
 		Chat("Use the Buttons in the bottom left of the screen to cast your magic spells.");
 		Chat("Some spells will inflict STATUS EFFECTS on enemies. Each STATUS EFFECT applies a specific debuff to those inflicted.");
 		Chat("The POISON and BURN effects will take away 1/16th of the enemies maximum HP each tick.");
-		Chat(" The CHILL effect slows down your enemies to 1/2 of their original walk speed.");
-		Chat(" The SHOCK effect will completely paralyze your enemies.");
+		Chat("The CHILL effect slows down your enemies to 1/2 of their original walk speed.");
+		Chat("The SHOCK effect will completely paralyze your enemies.");
 		Chat("When an enemy is defeated, the player gains SKILL POINTS. This is shown on the right side of the screen. To spend SKILL POINTS, press Tab to open the inventory.");
 		Chat("You will now be tested. Defeat this enemy to start the game...");
 	}

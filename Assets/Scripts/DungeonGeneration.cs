@@ -18,6 +18,7 @@ public class DungeonGeneration : MonoBehaviour {
 	public string[] enemies;
 
 	private List<GameObject> enemyObjects = new List<GameObject>();
+	private GameObject player;
 
 	public int levelStartEnemies = 0;
 	private int levelClearedFrame = 0;
@@ -59,12 +60,12 @@ public class DungeonGeneration : MonoBehaviour {
 		}
 
 		// Exhaust
-		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		player = GameObject.FindGameObjectWithTag("Player");
 		Inventory plrInv = player.GetComponent<Inventory>();
 		Relic curse = plrInv.GetEquippedCurse();
 		int maxEnemyPerRoom = 5;
 
-		if (curse.relicId == "Marked Skull") {
+		if (curse != null && curse.relicId == "Marked Skull") {
 			maxEnemyPerRoom = 10;
 		}
 
@@ -93,9 +94,27 @@ public class DungeonGeneration : MonoBehaviour {
 				return;
 			}
 
-			SceneManager.LoadScene(nextLevelId);
+			// REFERENCE: SceneManager.MoveGameObjectToScene
+			TravelToScene(nextLevelId);
 		}
 	}
+
+	// REFERENCE: SceneManager.MoveGameObjectToScene
+	private void TravelToScene(string sceneId) {
+		/*Scene currentScene = SceneManager.GetActiveScene();
+
+		AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneId, LoadSceneMode.Additive);
+
+		while (!asyncLoad.isDone) {
+			yield return null;
+		}
+
+		SceneManager.MoveGameObjectToScene(player, SceneManager.GetSceneByName(sceneId));
+		SceneManager.UnloadSceneAsync(currentScene);*/
+
+		SceneManager.LoadScene(sceneId);
+	}
+	// END REFERENCE
 
 	private string GetRoomShape(Vector2 cell, List<Vector2> cellList) {
 		string roomShape = "U";

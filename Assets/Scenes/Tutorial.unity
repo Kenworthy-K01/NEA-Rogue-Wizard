@@ -413,10 +413,36 @@ Prefab:
       propertyPath: m_Pivot.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1868830033583732, guid: 02073f77fcd3f0f4da15586afbde715a, type: 2}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
+    - target: {fileID: 114901185408914058, guid: 02073f77fcd3f0f4da15586afbde715a,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1928001433}
+    - target: {fileID: 114803236356422436, guid: 02073f77fcd3f0f4da15586afbde715a,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1928001433}
+    - target: {fileID: 114787315891967702, guid: 02073f77fcd3f0f4da15586afbde715a,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1928001433}
+    - target: {fileID: 114502518639740400, guid: 02073f77fcd3f0f4da15586afbde715a,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1928001433}
+    - target: {fileID: 114367543777460064, guid: 02073f77fcd3f0f4da15586afbde715a,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1928001433}
+    - target: {fileID: 114247833688016074, guid: 02073f77fcd3f0f4da15586afbde715a,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1928001433}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 02073f77fcd3f0f4da15586afbde715a, type: 2}
   m_IsPrefabAsset: 0
@@ -549,3 +575,9 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7196110ab7c06c44dafe397e27c65291, type: 2}
   m_IsPrefabAsset: 0
+--- !u!114 &1928001433 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114583230886916890, guid: 7196110ab7c06c44dafe397e27c65291,
+    type: 2}
+  m_PrefabInternal: {fileID: 1928001432}
+  m_Script: {fileID: 11500000, guid: 6b7c2feba63d5834ba1c56d1fde16bf7, type: 3}

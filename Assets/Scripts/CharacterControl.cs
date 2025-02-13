@@ -53,9 +53,14 @@ public class CharacterControl : MonoBehaviour {
 		spellLoadout = GetComponent<Loadout>();
 		sounds = GetComponent<AudioSource>();
 		DefaultMaterial = spriteRenderer.material;
-
+		
 		DontDestroyOnLoad(gameObject);
+	}
+
+	void OnLevelWasLoaded() {
 		transform.position = Vector3.zero;
+		GameObject winScreen = HeadsUpDisplay.transform.Find("WinScreen").gameObject;
+		winScreen.SetActive(false);
 	}
 	
 	void FixedUpdate () {
@@ -316,12 +321,17 @@ public class CharacterControl : MonoBehaviour {
 	public void UpdateClearCount() {
 		// Update the label to show what percent of enemies have been killed
 		// At 100% the level is complete
-
+		
 		// Get the enemy counts from the dungeon generator
 		DungeonGeneration generator = GameObject.FindGameObjectWithTag("Generator").GetComponent<DungeonGeneration>();
 		int numEnemies = generator.CountRemainingEnemies();
 		int totalEnemies = generator.levelStartEnemies;
 
+		// Update Level Id Label
+		GameObject LevelLabel = HeadsUpDisplay.transform.Find("LevelId").gameObject;
+		Text levelIdText = LevelLabel.GetComponent<Text>();
+		levelIdText.text = "Level 0" + generator.level;
+		
 		// Calculate the percentage of enemies that have been killed so far
 		float percent = (1-((float)numEnemies / (float)totalEnemies))*100;
 

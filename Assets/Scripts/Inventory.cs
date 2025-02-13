@@ -31,6 +31,8 @@ public class Inventory : MonoBehaviour {
 		curseIcon = InventoryCanvas.transform.Find("Container").Find("CurseIcon").gameObject;
 		playerAttr = GetComponent<Attributes>();
 		playerHealth = GetComponent<Health>();
+		
+		DontDestroyOnLoad(HeadsUpDisplay);
 	}
 
 	private void Update() {

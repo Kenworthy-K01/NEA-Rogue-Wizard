@@ -80,6 +80,7 @@ public class DungeonGeneration : MonoBehaviour {
 
 		// Initially count the total number of enemies
 		levelStartEnemies = CountRemainingEnemies();
+		player.SendMessage("UpdateClearCount");
 	}
 
 	private void FixedUpdate() {
@@ -90,6 +91,8 @@ public class DungeonGeneration : MonoBehaviour {
 			// Check if the next level exists
 			int buildIndex = SceneUtility.GetBuildIndexByScenePath(nextLevelId);
 			if (buildIndex == -1) {
+				Destroy(player);
+				Destroy(GameObject.FindGameObjectWithTag("HUD"));
 				SceneManager.LoadScene("LegendaryWizardScene");
 				return;
 			}
@@ -222,7 +225,7 @@ public class DungeonGeneration : MonoBehaviour {
 	}
 
 	private GameObject AddLevelRoom(string roomId, Vector3 atPosition) {
-		string levelId = "Level0" + level;
+		string levelId = "Level01"; // + level;
 
 		// Load room prefab from resources folder
 		GameObject roomOriginal = Resources.Load<GameObject>(levelId + "/" + roomId);

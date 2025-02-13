@@ -50,6 +50,14 @@ public class Inventory : MonoBehaviour {
 		}
 	}
 
+	public Relic GetEquippedRelic() {
+		return equippedRelic;
+	}
+
+	public Relic GetEquippedCurse() {
+		return equippedCurse;
+	}
+
 	private void ToggleInventory() {
 		// Toggle visibility and time scale to pause game
 		if (isOpen) {
@@ -112,5 +120,19 @@ public class Inventory : MonoBehaviour {
 	public void QuitGame() {
 		Time.timeScale = 1;
 		SceneManager.LoadScene("MainMenu");
+	}
+
+	// For Relic effects that are applied on enemy death
+	public void EnemyKilled() {
+		if (equippedRelic == null) { return; }
+
+		switch (equippedRelic.relicId) {
+			case "Vampiric Ring":
+				playerHealth.ApplyHealing(10);
+				break;
+			case "Didactic Thesis":
+				playerAttr.AwardSkillPoints(3);
+				break;
+		}
 	}
 }

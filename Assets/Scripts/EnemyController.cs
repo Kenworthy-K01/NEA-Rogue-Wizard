@@ -132,6 +132,7 @@ public class EnemyController : MonoBehaviour {
 		// Reward player
 		generator.SendMessage("EnemyKilled", gameObject);
 		player.SendMessage("UpdateClearCount");
+		player.SendMessage("EnemyKilled");
 		Attributes attr = player.GetComponent<Attributes>();
 		attr.AwardSkillPoints(3);
 
@@ -267,9 +268,9 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	private void DropRelic() {
-		//if (Random.Range(1, 100) > 30) { return; }
-		string[] relics = {"VampiricRing", "IronBall"};
-		string relicId = relics[Random.Range(0, relics.Length-1)];
+		if (Random.Range(1, 100) > 40) { return; }
+		string[] relics = {"VampiricRing", "GoldenBoots", "DidacticThesis", "IronBall", "BloodDagger", "MarkedSkull"};
+		string relicId = relics[Random.Range(0, relics.Length)];
 		GameObject relicObj = Resources.Load<GameObject>("Relics/" + relicId);
 		Instantiate(relicObj, transform.position, Quaternion.identity);
 	}

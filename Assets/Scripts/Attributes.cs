@@ -81,7 +81,29 @@ public class Attributes : MonoBehaviour {
 	}
 
 	public int CalculateWalkSpeed() {
-		return Mathf.RoundToInt(5+(agility/25));
+		Inventory inv = GetComponent<Inventory>();
+		float buffMult = 1f;
+		if (inv != null) {
+			// Apply speed mults from relics
+			Relic curse = inv.GetEquippedCurse();
+			Relic relic = inv.GetEquippedRelic();
+			if (curse != null) {
+				switch (curse.relicId) {
+					case "Iron Ball":
+						buffMult *= 0.5f;
+						break;
+				}
+			}
+			if (relic != null) {
+				switch(relic.relicId) {
+					case "Golden Boots":
+						buffMult *= 2f;
+						break;
+				}
+			}
+		}
+		// Return resultant Walk Speed
+		return Mathf.RoundToInt((5+((agility)/25))*buffMult);
 	}
 
 	public int CalculateMaxHealth() {

@@ -59,12 +59,21 @@ public class DungeonGeneration : MonoBehaviour {
 		}
 
 		// Exhaust
+		GameObject player = GameObject.FindGameObjectWithTag("Player");
+		Inventory plrInv = player.GetComponent<Inventory>();
+		Relic curse = plrInv.GetEquippedCurse();
+		int maxEnemyPerRoom = 5;
+
+		if (curse.relicId == "Marked Skull") {
+			maxEnemyPerRoom = 10;
+		}
+
 		foreach (Vector2 cell in cells) {
 			if (cell == Vector2.zero) { continue; }
 			string roomId = GetRoomShape(cell, cells);
 			GameObject room = AddLevelRoom(roomId, cell*12);
 			if (Random.Range(1, 100) <= 40) {
-				PopulateRoom(room, Random.Range(1, 5));
+				PopulateRoom(room, Random.Range(1, maxEnemyPerRoom));
 			}
 		}
 
@@ -80,7 +89,6 @@ public class DungeonGeneration : MonoBehaviour {
 			// Check if the next level exists
 			int buildIndex = SceneUtility.GetBuildIndexByScenePath(nextLevelId);
 			if (buildIndex == -1) {
-				Debug.Log("You won the whole game.");
 				SceneManager.LoadScene("LegendaryWizardScene");
 				return;
 			}
@@ -173,7 +181,7 @@ public class DungeonGeneration : MonoBehaviour {
 		for (int i = 1; i <= num; i++) {
 			string enemyId = enemies[Random.Range(0, enemies.Length)];
 			GameObject entityOriginal = Resources.Load<GameObject>("Entities/" + enemyId);
-			Vector3 atPosition = room.transform.Find("SpawnPoint" + Random.Range(1, 3)).position;
+			Vector3 atPosition = room.transform.Find("SpawnPoint" + Random.Range(1, 3)).position + new Vector3(Random.Range(-2, 2), Random.Range(-2, 2), 0);
 			GameObject entityInstance = Instantiate(entityOriginal, atPosition, Quaternion.identity);
 			AddEnemy(entityInstance);
 		}

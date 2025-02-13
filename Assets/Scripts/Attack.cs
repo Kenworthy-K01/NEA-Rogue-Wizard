@@ -30,7 +30,15 @@ public class Attack : MonoBehaviour {
 		Attributes attributes = target.GetComponentInChildren<Attributes>();
 		if (attributes == null) { return 0; }
 
-		// super secret damage formula goes here
+		float damage = baseDamage;
+
+		Inventory inv = target.GetComponentInChildren<Inventory>();
+		if (inv != null) {
+			Relic curse = inv.GetEquippedCurse();
+			if (curse.relicId == "Blood Dagger") {
+				damage *= 1.2f;
+			}
+		}
 
 		return (int)baseDamage;
 	}

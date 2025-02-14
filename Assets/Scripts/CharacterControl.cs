@@ -53,16 +53,35 @@ public class CharacterControl : MonoBehaviour {
 		spellLoadout = GetComponent<Loadout>();
 		sounds = GetComponent<AudioSource>();
 		DefaultMaterial = spriteRenderer.material;
-		
+
+		// Player Object is not reset on level load
 		DontDestroyOnLoad(gameObject);
+
+		// REFERENCE DOCS: OnLevelWasLoaded / SceneManager.sceneLoaded
+		//Tell our 'OnLevelFinishedLoading' function to start listening for a scene change as soon as this script is enabled.
+		SceneManager.sceneLoaded += OnLevelFinishedLoading;
 	}
 
-	void OnLevelWasLoaded() {
+	void OnDisable() {
+		//Tell our 'OnLevelFinishedLoading' function to stop listening for a scene change as soon as this script is disabled. Remember to always have an unsubscription for every delegate you subscribe to!
+		SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+	}
+	// END REFERENCE
+
+	void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode) {
+		hurtbox.FlushCollidingList();
+		CleanupActiveAttack();
+		currentState = HumanState.Idle;
+		diedFrame = 0;
+		stunStartFrame = 0;
 		transform.position = Vector3.zero;
+
 		GameObject winScreen = HeadsUpDisplay.transform.Find("WinScreen").gameObject;
 		winScreen.SetActive(false);
+		GameObject deathScreen = HeadsUpDisplay.transform.Find("DeathScreen").gameObject;
+		deathScreen.SetActive(false);
 	}
-	
+
 	void FixedUpdate () {
 		int now = Time.frameCount;
 		currentState = GetHumanState(now);
@@ -113,6 +132,7 @@ public class CharacterControl : MonoBehaviour {
 				deathScreen.SetActive(true);
 			} else if (now - diedFrame > 360) {
 				// RESPAWN by reloading the current scene.
+				health.ApplyHealing(health.GetMaxHealth(false));
 				SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 			}
 			spriteRenderer.material = DefaultMaterial;
@@ -182,6 +202,7 @@ public class CharacterControl : MonoBehaviour {
 	// Changes animator parameters to switch between animation states
 	private void AnimateState(HumanState state, Vector3 moveDirection) {
 		if (state == HumanState.Idle) {
+			spriteRenderer.sortingOrder = 0;
 			animator.SetBool("idle", true);
 			animator.SetBool("walking", false);
 		}  else if (state == HumanState.Attacking) {
@@ -217,6 +238,7 @@ public class CharacterControl : MonoBehaviour {
 		} else if (state == HumanState.Stunned) {
 			//	animator.Play("Stun");
 		} else if (state == HumanState.Dead) {
+			animator.SetBool("idle", false);
 			animator.Play("Player_Death");
 			spriteRenderer.sortingOrder = -2;
 		}
@@ -303,6 +325,7 @@ public class CharacterControl : MonoBehaviour {
 	}
 
 	private void CleanupActiveAttack() {
+		if (activeAttack == null) { return; }
 		Destroy(activeSpellObj);
 		hurtbox.enabled = false;
 

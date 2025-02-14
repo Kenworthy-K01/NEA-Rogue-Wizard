@@ -22,6 +22,10 @@ public class Hurtbox : MonoBehaviour {
 		colliding.Remove(hit.gameObject);
 	}
 
+	public void FlushCollidingList() {
+		colliding.Clear();
+	}
+
 	public List<GameObject> GetObjectsInBoxBounds() {
 		return colliding;
 	}

@@ -22,6 +22,7 @@ public class Relic : MonoBehaviour {
 		if (hit.gameObject.CompareTag("Player")) {
 			Inventory playerInv = hit.gameObject.GetComponent<Inventory>();
 			playerInv.EquipRelic(this);
+			DontDestroyOnLoad(this);
 			Destroy(image);
 		}
 	}

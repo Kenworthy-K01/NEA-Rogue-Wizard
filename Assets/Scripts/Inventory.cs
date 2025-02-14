@@ -127,6 +127,7 @@ public class Inventory : MonoBehaviour {
 	// For Relic effects that are applied on enemy death
 	public void EnemyKilled() {
 		if (equippedRelic == null) { return; }
+		Debug.Log(equippedRelic.relicId);
 
 		switch (equippedRelic.relicId) {
 			case "Vampiric Ring":

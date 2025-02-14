@@ -25,22 +25,20 @@ public class MainMenu : MonoBehaviour {
 		// Toggle visibility of control frame
 		if (controlsOpen) {
 			controlsOpen = false;
-			controlScrn.transform.position = new Vector3(-1000, 0, 0) + transform.position;
 		} else {
 			controlsOpen = true;
-			controlScrn.transform.position = new Vector3(-400, 0, 0) + transform.position;
 		}
+		controlScrn.SetActive(controlsOpen);
 	}
 
 	public void OnCreditsBtnClicked() {
 		// Toggle visibility of credits frame
 		if (creditsOpen) {
 			creditsOpen = false;
-			creditScrn.transform.position = new Vector3(1000, 0, 0) + transform.position;
 		} else {
 			creditsOpen = true;
-			creditScrn.transform.position = new Vector3(400, 0, 0) + transform.position;
 		}
+		creditScrn.SetActive(creditsOpen);
 	}
 
 }

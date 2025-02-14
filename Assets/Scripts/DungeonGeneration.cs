@@ -97,27 +97,13 @@ public class DungeonGeneration : MonoBehaviour {
 				return;
 			}
 
-			// REFERENCE: SceneManager.MoveGameObjectToScene
 			TravelToScene(nextLevelId);
 		}
 	}
 
-	// REFERENCE: SceneManager.MoveGameObjectToScene
 	private void TravelToScene(string sceneId) {
-		/*Scene currentScene = SceneManager.GetActiveScene();
-
-		AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneId, LoadSceneMode.Additive);
-
-		while (!asyncLoad.isDone) {
-			yield return null;
-		}
-
-		SceneManager.MoveGameObjectToScene(player, SceneManager.GetSceneByName(sceneId));
-		SceneManager.UnloadSceneAsync(currentScene);*/
-
 		SceneManager.LoadScene(sceneId);
 	}
-	// END REFERENCE
 
 	private string GetRoomShape(Vector2 cell, List<Vector2> cellList) {
 		string roomShape = "U";
@@ -203,7 +189,7 @@ public class DungeonGeneration : MonoBehaviour {
 		for (int i = 1; i <= num; i++) {
 			string enemyId = enemies[Random.Range(0, enemies.Length)];
 			GameObject entityOriginal = Resources.Load<GameObject>("Entities/" + enemyId);
-			Vector3 atPosition = room.transform.Find("SpawnPoint" + Random.Range(1, 3)).position + new Vector3(Random.Range(-2, 2), Random.Range(-2, 2), 0);
+			Vector3 atPosition = room.transform.Find("SpawnPoint" + Random.Range(1, 3)).position;
 			GameObject entityInstance = Instantiate(entityOriginal, atPosition, Quaternion.identity);
 			AddEnemy(entityInstance);
 		}

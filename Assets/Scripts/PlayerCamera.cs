@@ -6,12 +6,15 @@ public enum CameraType {Follow, Scriptable};
 
 public class PlayerCamera : MonoBehaviour {
 
+	// Object references and camera behaviour
 	public GameObject cameraSubject;
 	public float followBuffer = 3f;
 	public CameraType cameraType = CameraType.Follow;
 	
 	private Vector3 positionTarget;
 
+	// Set the cameraSubject to the player
+	// If one isn't already set
 	private void Start() {
 		if (cameraSubject == null) {
 			cameraSubject = GameObject.FindGameObjectWithTag("Player");
@@ -31,6 +34,7 @@ public class PlayerCamera : MonoBehaviour {
 		}
 	}
 
+	// Instantly jump to camera subject position
 	public void MoveToCameraSubject() {
 		transform.position = cameraSubject.transform.position + new Vector3(0, 0, -10);
 	}

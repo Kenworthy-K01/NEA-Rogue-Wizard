@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Health : MonoBehaviour {
 
+	// Store values
 	private int MaxHealth = 100;
 	private int CurHealth = 1;
 
+	// Attributes object for scaling
 	private Attributes attributes;
 
+	// Update max health when started
 	private void Start() {
 
 		attributes = GetComponent<Attributes>();
@@ -17,10 +20,12 @@ public class Health : MonoBehaviour {
 		CurHealth = MaxHealth;
 	}
 
+	// Return current health value
 	public int GetCurrentHealth() {
 		return CurHealth;
 	}
 
+	// Return maximum health value
 	public int GetMaxHealth(bool recalculate) {
 		if (recalculate) {
 			MaxHealth = attributes.CalculateMaxHealth();
@@ -58,6 +63,7 @@ public class Health : MonoBehaviour {
 		}
 	}
 	
+	// Sets current health to max health
 	public void HealToMax() {
 		ApplyHealing(MaxHealth);
 	}

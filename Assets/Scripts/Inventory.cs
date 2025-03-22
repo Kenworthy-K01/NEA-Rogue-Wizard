@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class Inventory : MonoBehaviour {
 
+	// UI Object references
 	private GameObject HeadsUpDisplay;
 	private GameObject SPLabel;
 	private GameObject InventoryCanvas;
@@ -13,9 +14,11 @@ public class Inventory : MonoBehaviour {
 	private GameObject relicIcon;
 	private GameObject curseIcon;
 
+	// Buffs + Debuffs
 	private Relic equippedRelic;
 	private Relic equippedCurse;
 
+	// Player objects
 	private Attributes playerAttr;
 	private Health playerHealth;
 
@@ -44,6 +47,7 @@ public class Inventory : MonoBehaviour {
 		}
 	}
 
+	// Set stored relic values
 	public void EquipRelic(Relic relic) {
 		if (relic.cursed) {
 			equippedCurse = relic;
@@ -52,16 +56,18 @@ public class Inventory : MonoBehaviour {
 		}
 	}
 
+	// Return equipped relic
 	public Relic GetEquippedRelic() {
 		return equippedRelic;
 	}
-
+	
+	// Return equipped curse
 	public Relic GetEquippedCurse() {
 		return equippedCurse;
 	}
 
+	// Toggle visibility and time scale to pause game
 	private void ToggleInventory() {
-		// Toggle visibility and time scale to pause game
 		if (isOpen) {
 			isOpen = false;
 		} else {
@@ -90,6 +96,7 @@ public class Inventory : MonoBehaviour {
 		intLabel.text = playerAttr.intelligence.ToString();
 		chrLabel.text = playerAttr.charisma.ToString();
 
+		// Update relic image sprites
 		if (equippedRelic != null) {
 			Image icon = relicIcon.GetComponent<Image>();
 			icon.sprite = equippedRelic.GetIconSprite();
@@ -100,8 +107,8 @@ public class Inventory : MonoBehaviour {
 		}
 	}
 
+	// Increase a stat in return for a skill point
 	public void SpendSkillPoint(string attribute) {
-		// 
 		if (!isOpen || playerAttr.skillPoints < 1) { return; }
 		if (attribute == "strength") {
 			playerAttr.SetStrength(playerAttr.strength + 1);
@@ -119,6 +126,7 @@ public class Inventory : MonoBehaviour {
 		UpdateAttributeLabels();
 	}
 
+	// Return to main menu screen
 	public void QuitGame() {
 		Time.timeScale = 1;
 		SceneManager.LoadScene("MainMenu");

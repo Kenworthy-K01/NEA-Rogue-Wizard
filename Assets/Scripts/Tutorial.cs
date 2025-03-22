@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class Tutorial : MonoBehaviour {
 
+	// Object references
 	private GameObject player;
 	private GameObject HUD;
 	private GameObject chatContainer;
@@ -15,6 +16,7 @@ public class Tutorial : MonoBehaviour {
 
 	private CharacterControl controls;
 
+	// Chat states and queue
 	private Queue<string> chatQueue = new Queue<string>();
 	private string currentMsg = "";
 	private string currentContent = "";
@@ -23,6 +25,7 @@ public class Tutorial : MonoBehaviour {
 
 	private bool battleStarted = false;
 	
+	// Get objects and start tutorial sequence
 	private void Start() {
 		
 		player = GameObject.FindGameObjectWithTag("Player");
@@ -36,6 +39,8 @@ public class Tutorial : MonoBehaviour {
 		StartTutorial();
 	}
 
+	// Loop through chat queue
+	// Display one character of front line.
 	private void Update() {
 		if (awaitingInput) {
 			if (Input.GetKeyDown(KeyCode.Mouse0)) {
@@ -56,6 +61,7 @@ public class Tutorial : MonoBehaviour {
 			}
 		} else if (chatQueue.Count == 0 && !awaitingInput) {
 			chatContainer.SetActive(false);
+			// Spawn enemy when last message sent
 			StartTutorialBattle();
 			return;
 		} else if (!awaitingInput) {
@@ -64,10 +70,12 @@ public class Tutorial : MonoBehaviour {
 		}
 	}
 
+	// Send message to chat queue
 	private void Chat(string msg) {
 		chatQueue.Enqueue(msg);
 	}
 
+	// Main tutorial sequence
 	private void StartTutorial() {
 		controls.WALKENABLED = false;
 		
@@ -84,6 +92,7 @@ public class Tutorial : MonoBehaviour {
 		Chat("You will now be tested. Defeat this enemy to start the game...");
 	}
 
+	// Spawn tutorial enemy
 	private void StartTutorialBattle() {
 		if (battleStarted) { return; }
 

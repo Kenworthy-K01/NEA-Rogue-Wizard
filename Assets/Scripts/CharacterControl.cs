@@ -9,16 +9,19 @@ using Random = UnityEngine.Random;
 
 public class CharacterControl : MonoBehaviour {
 
+	// Player state machine
 	private enum HumanState { Idle, Walking, Attacking, Stunned, Frozen, Dead };
 
+	// Public configuration settings
 	public int WALKSPEED = 2;
 	public bool WALKENABLED = true;
 	public Material FlashMaterial;
-
+	
 	public AudioClip[] attackSounds;
 	public AudioClip[] damageSounds;
 	public AudioClip deathSound;
 
+	// Object references
 	private Material DefaultMaterial;
 	private int SPRINTBOOST = 3;
 
@@ -34,6 +37,7 @@ public class CharacterControl : MonoBehaviour {
 	private AudioSource sounds;
 	private bool sprinting = false;
 
+	// States & helper attributes
 	private Vector2 mouseDirectionV2;
 	private Vector3 mouseDirectionV3;
 	private int stunStartFrame = 0;
@@ -42,6 +46,7 @@ public class CharacterControl : MonoBehaviour {
 	private Attack activeAttack;
 	private GameObject activeSpellObj;
 
+	// Get all object references and connect OnLevelFinishedLoading event
 	void Start () {
 		HeadsUpDisplay = GameObject.FindGameObjectWithTag("HUD");
 		hurtbox = GetComponentInChildren<Hurtbox>();
@@ -63,11 +68,12 @@ public class CharacterControl : MonoBehaviour {
 	}
 
 	void OnDisable() {
-		//Tell our 'OnLevelFinishedLoading' function to stop listening for a scene change as soon as this script is disabled. Remember to always have an unsubscription for every delegate you subscribe to!
+		//Tell our 'OnLevelFinishedLoading' function to stop listening for a scene change as soon as this script is disabled.
 		SceneManager.sceneLoaded -= OnLevelFinishedLoading;
 	}
 	// END REFERENCE
 
+	// Reset player state and disable win / death screens
 	void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode) {
 		hurtbox.FlushCollidingList();
 		CleanupActiveAttack();
@@ -82,6 +88,7 @@ public class CharacterControl : MonoBehaviour {
 		deathScreen.SetActive(false);
 	}
 
+	// Update a lot of player states and behaviours
 	void FixedUpdate () {
 		int now = Time.frameCount;
 		currentState = GetHumanState(now);
@@ -120,6 +127,7 @@ public class CharacterControl : MonoBehaviour {
 		// Frozen state for manual control only
 		if (currentState == HumanState.Frozen) { return; }
 
+		// MAIN STATE MACHINE 
 		if (currentState == HumanState.Stunned) {
 			spriteRenderer.material = FlashMaterial;
 			MoveCharacter(Vector3.zero);
@@ -170,11 +178,13 @@ public class CharacterControl : MonoBehaviour {
 			}
 		}
 
+		// Animations & Rendering
 		spriteRenderer.material = DefaultMaterial;
 		AnimateState(currentState, moveDirection);
 		HandleCastInput();
 	}
 
+	// Move target back when hit
 	private void Knockback(GameObject entity) {
 		Vector3 dir = (entity.transform.position - transform.position);
 		dir.Normalize();
@@ -183,6 +193,7 @@ public class CharacterControl : MonoBehaviour {
 		rb.velocity = dir * 6;
 	}
 
+	// Return new state based on input and player values
 	private HumanState GetHumanState(int now) {
 		HumanState state = HumanState.Idle;
 
@@ -281,6 +292,8 @@ public class CharacterControl : MonoBehaviour {
 		}
 	}
 
+	// Create a new attack with vfx, hitbox, sound effects
+	// Used when player presses an attack key
 	private void CastAttack(int slot) {
 		if (!WALKENABLED) { return; }
 		if (spellLoadout.GetSpellCooldown(slot) != 0) { return; }
@@ -308,6 +321,7 @@ public class CharacterControl : MonoBehaviour {
 		spellLoadout.SpellStartCooldown(slot, activeAttack.cooldown);
 	}
 
+	// Match attack hitbox & vfx to mouse position
 	private void UpdateAttackPosition(GameObject attackVFX) {
 		Vector3 dir = mouseDirectionV3;
 		dir.z = 0;
@@ -324,6 +338,7 @@ public class CharacterControl : MonoBehaviour {
 		attackVFX.transform.rotation = vfxRot;
 	}
 
+	// Destroy attack vfx and hitbox
 	private void CleanupActiveAttack() {
 		if (activeAttack == null) { return; }
 		Destroy(activeSpellObj);
@@ -333,6 +348,7 @@ public class CharacterControl : MonoBehaviour {
 		activeAttack = null;
 	}
 
+	// Player just got hit
 	private void HitStun() {
 		sounds.clip = damageSounds[Random.Range(0, damageSounds.Length)];
 		sounds.Play();
@@ -341,6 +357,7 @@ public class CharacterControl : MonoBehaviour {
 		spriteRenderer.material = FlashMaterial;
 	}
 
+	// Player defeated something, update the on-screen values
 	public void UpdateClearCount() {
 		// Update the label to show what percent of enemies have been killed
 		// At 100% the level is complete
